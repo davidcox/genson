@@ -51,6 +51,9 @@ value
 from pyparsing import *
 from parameter_generators import *
 
+def make_tuple(x):
+    return tuple(x)
+
 # a simple helper functions
 def generator(name, gen_args=[], gen_kwargs={}):
 
@@ -79,7 +82,8 @@ genson_key_tuple = Forward()
 genson_key = ( json_string | genson_key_tuple )
 genson_key_tuple << Suppress('(') + delimitedList( genson_key ) + \
                          Suppress(')')
-genson_key_tuple.setParseAction(tuple)
+# genson_key_tuple.setParseAction(tuple)
+genson_key_tuple.setParseAction(make_tuple)
 
 json_object = Forward()
 json_value = Forward()
@@ -87,7 +91,8 @@ json_elements = delimitedList( json_value )
 json_array = Group(Suppress('[') + Optional(json_elements) + Suppress(']') )
 
 genson_value_tuple = Suppress('(') + json_elements + Suppress(')')
-genson_value_tuple.setParseAction(tuple)
+# genson_value_tuple.setParseAction(tuple)
+genson_value_tuple.setParseAction(make_tuple)
 
 genson_kwargs = Group(delimitedList( Word(alphas) + Suppress("=") + \
                               json_value ))
