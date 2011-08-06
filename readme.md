@@ -1,6 +1,6 @@
 ## GENSON
 
-GENSON is a simple experimental extension to JSON syntax for specifying collections of JSON objects sampled from arbitrary spaces.  The primary use case for such a tool would be performing parameter searches / optimization, where each parameter set is allowed to be arbitrarily structured data.  Did I mention it was experimental?  It's only a few hundred lines of code, and I'm still feeling around for the right level of complexity.
+GENSON is a simple experimental extension to JSON syntax for specifying collections of JSON objects sampled from arbitrary spaces.  The primary use case for such a tool would be performing parameter searches / optimization, where each parameter set is allowed to be arbitrarily structured data.  Did I mention it was experimental?  It's only a few hundred lines of code, and I'm still feeling around for the right level of complexity (and if this is worthwhile in the first place)
 
 The API is roughly meant to follow that of the Python `simplejson` module.  You can load a GENSON document from a file by calling `genson.load(f)`, and from a string by calling `genson.loads(s)`.  The returned object is an iterator over dictionary objects suitable for dumping as JSON (e.g. using `simplejson`).
 
@@ -12,12 +12,12 @@ resolves to six objects with `parameter1` draw from a zero mean, unit variance g
 
     { 'parameter2': < 1, 2, 3 > }
     
-resolves to three objects with `parameter2` equal to 1, 2, and 3.  Combinations of sampling operations result in exhaustive crosses, such that
+resolves to three objects with `parameter2` equal to 1, 2, and 3, respectively, in each resulting object.  Combinations of sampling operations result in exhaustive crosses, such that
 
     { 'parameter3': <1, 2, 3>,
       'parameter4': <4, 5, 6> }
 
-results in nine objects.
+results in nine objects ( i.e. [1,4], [1,5], [1,6], [2,4] ... ).
 
 GENSON also introduces tuple keys to JSON as a mechanism for specifying sampling dependencies:
 
