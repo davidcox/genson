@@ -19,7 +19,7 @@ resolves to three objects with `parameter2` equal to 1, 2, and 3, respectively, 
 
 results in nine objects ( i.e. [1,4], [1,5], [1,6], [2,4] ... ).
 
-GENSON also introduces tuple keys to JSON as a mechanism for specifying sampling dependencies:
+GenSON also introduces tuple keys to JSON as a mechanism for specifying sampling dependencies:
 
     { ("p6","p7","p8"): < (1,2,3), (4,5,6) > }
 
