@@ -66,8 +66,9 @@ def generator(name, gen_args=[], gen_kwargs={}):
     
     return g
 
-class ScopedReference (tuple):
-    pass
+class ScopedReference:
+    def __init__(self, scope_list):
+        self.scope_list = scope_list
 
 TRUE = Keyword("true").setParseAction( replaceWith(True) )
 FALSE = Keyword("false").setParseAction( replaceWith(False) )
@@ -94,16 +95,15 @@ genson_value_tuple.setParseAction(lambda x: tuple(x))
 
 THIS = Keyword("this")
 PARENT = Keyword("parent")
-ROOT = Keyword("@root")
+ROOT = Keyword("root")
 genson_initial_scope = (THIS | PARENT | ROOT)
-genson_unquoted_key = Word(alphanums)
+genson_unquoted_key = Word(alphanums + '_')
 genson_running_scope = ( PARENT | genson_unquoted_key )
 
 genson_ref =  genson_initial_scope + \
                    Suppress('.') + \
-                   Optional( delimitedList(genson_running_scope, '.') + \
-                        Suppress('.') ) + \
-                   genson_unquoted_key 
+                   delimitedList(genson_running_scope, '.')
+                   
 genson_ref.setParseAction(lambda x: ScopedReference(x.asList()))
                    
 
@@ -137,6 +137,7 @@ genson_object.ignore( json_comment )
 
 def clean_dict(x):
     x_list = x.asList()
+    print x_list
     return dict(x_list)
 
 genson_object.setParseAction(clean_dict)

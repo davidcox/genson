@@ -31,8 +31,8 @@ As in JSON, values can be arbitrarily deeply nested, such that constructs like:
 
 are valid, and do what you'd "expect".
 
-GenSON values can also make reference to other keys elsewhere in the object.  While the intent is to eventually support arbitrary javascript-style scoping (this.blah.blah), currently, only references to the top-level of the dictionary are available via the `@root` keyword (e.g. `@root.parameter1` refers to the key `parameter1` in the top-level dictionary)
+GenSON values can also make reference to other keys elsewhere in the object.  Any GenSON value can take a Javascript-style object member reference (e.g. `this.parameter1`).  The keywords `this`, `parent`, and `root` allow references to other object members elsewhere in the object hierarchy.
 
 ## Future plans
 
-I'd like to add support for expressions and more complete internal references, so that one key can refer to another in an arbitrary expression (e.g. if you wanted a `threshold2` member to always be equal to `2*this.threshold1`).  This shouldn't be too hard; currently the parser is only about 100 lines long, and not terribly complex.
+I'd like to add support for expressions (e.g. if you wanted a `threshold2` member to always be equal to `2*this.threshold1`).  This shouldn't be too hard; currently the parser is only about 100 lines long, and not terribly complex.
