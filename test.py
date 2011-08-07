@@ -10,8 +10,9 @@ if __name__ == "__main__":
            "test2" : { "nested": gaussian(0,1,draws=1) },
            "test3" : <"a", "b", uniform(0,1)>,
            ("test4", "test5") : (0, 1), 
-           ("test6", "test7") : 3,
-           ("test","test5") : <("d", "e"), ("f", "g")>
+           ("test6", "test7") : 1,
+           ("test","test5") : <("d", "e"), ("f", "g")>,
+           "testA": {"another_nested" : @root.test5 }
        }
        """
     son_iterator = genson.loads(testdata)

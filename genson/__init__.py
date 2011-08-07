@@ -7,18 +7,23 @@ def istuple(x):
     return isinstance(x, tuple)
 def isiterable(x):
     return getattr(x, '__iter__', False)
+def isref(x):
+    return isinstance(x, ScopedReference)
 
-def jsonify(x):
+def jsonify(x, root = None):
+    
     if isinstance(x, ParameterGenerator):
-        return jsonify(x.value())
+        return jsonify(x.value(), root)
     elif isdict(x):
         # build a new copy of the dict
         return_dict = {}
+        
+        if root is None:
+            root = return_dict
+
         for k,v in x.items():
-            val = jsonify(v)
-            
-            #print("%s = jsonify(%s)" % (val, v))
-            
+            val = jsonify(v, root)
+                        
             # check if we need to do a splat
             if istuple(k):
                 if istuple(val):
@@ -26,23 +31,31 @@ def jsonify(x):
                         raise Exception("Invalid splat")
                         
                     for (splat_key,splat_val) in zip(k,val):
-                        return_dict[splat_key] = jsonify(splat_val)
+                        return_dict[splat_key] = jsonify(splat_val, root)
                 else:
                     for splat_key in k:
-                        return_dict[splat_key] = jsonify(val)
+                        return_dict[splat_key] = jsonify(val, root)
             else:
                 return_dict[k] = val
             
         return return_dict
+    elif isref(x):
+        # TODO: more complex logic here
+        # for now, just support root level key references
+        assert( len(x) == 2 and  x[0] == '@root' )
+        key = x[1]
+        
+        return jsonify( root[key], root )
+        
     elif istuple(x):
         return_list = []
         for v in x:
-            return_list.append(jsonify(v)) 
+            return_list.append(jsonify(v, root)) 
         return tuple(return_list)
     elif isiterable(x):
         return_list = []
         for v in x:
-            return_list.append(jsonify(v))       
+            return_list.append(jsonify(v, root))       
         return return_list                     
     else:
         return x
