@@ -1,4 +1,5 @@
 import genson
+import time
 
 
 if __name__ == "__main__":
@@ -11,16 +12,41 @@ if __name__ == "__main__":
            "test3" : <"a", "b", uniform(0,1)>,
            ("test4", "test5") : (0, 1), 
            ("test6", "test7") : 1,
-           ("test","test5") : <("d", "e"), ("f", "g")>,
+           ("test8","test9") : <("d", "e"), ("f", "g")>,
            "testA": {"another_nested" : root.test5,
                      "parent_test" : parent.test5},
            "testB": this.test5,
            "testC": this.test2.nested,
            "test_with_underscores": 4,
-           "testD": this.test_with_underscores
+           "testD": this.test_with_underscores,
+           "testE": sin(4),
+           "testF": sin(this.testE),
+           "testG": 10,
+           "testExpr": 2.2*this.testG + (10 / sin(this.testA.another_nested)),
+           "testZ": 10
        }
        """
+    testdata2 = """
+        {
+           "test0": 4,
+           "test1" : <0,1,2>,
+           "test3" : <"a", "b", uniform(0,1)>,
+           ("test4", "test5") : (0, 1), 
+           ("test6", "test7") : 1,
+           ("test8","test9") : <("d", "e"), ("f", "g")>
+        }
+    """
+      
+    tic = time.time()
+    son_iterator = genson.loads(testdata2)
+    toc = time.time() - tic
+    print("Simple example parse time: %s" % toc)
+           
+    tic = time.time()
     son_iterator = genson.loads(testdata)
+    toc = time.time() - tic
+    print("Complex example parse time: %s" % toc)
+    
     
     for d in son_iterator:
         print d
