@@ -1,6 +1,6 @@
 ## GenSON
 
-GenSON is a simple experimental extension to JSON syntax for specifying collections of JSON objects sampled from arbitrary spaces.  The primary use case for such a tool would be performing parameter searches / optimization, where each parameter set is allowed to be arbitrarily structured data.  Did I mention it was experimental?  It"s only a few hundred lines of code, and I"m still feeling around for the right level of complexity (and if this is worthwhile in the first place)
+GenSON is a simple experimental extension to JSON syntax for specifying collections of JSON objects sampled from arbitrary spaces.  The primary use case for such a tool would be performing parameter searches / optimization, where each parameter set is allowed to be arbitrarily structured data.  Did I mention it was experimental?  It's only a few hundred lines of code, and I'm still feeling around for the right level of complexity (and if this is worthwhile in the first place)
 
 The API is roughly meant to follow that of the Python `simplejson` module.  You can load a GenSON document from a file by calling `genson.load(f)`, and from a string by calling `genson.loads(s)`.  The returned object is an iterator over dictionary objects suitable for dumping as JSON (e.g. using `simplejson`).
 
@@ -35,4 +35,4 @@ GenSON values can also make reference to other keys elsewhere in the object.  Wh
 
 ## Future plans
 
-I"d like to add support for expressions and more complete internal references, so that one key can refer to another in an arbitrary expression (e.g. if you wanted a `threshold2` member to always be equal to `2*this.threshold1`).  This shouldn't be too hard; currently the parser is only about 100 lines long, and not terribly complex.
+I'd like to add support for expressions and more complete internal references, so that one key can refer to another in an arbitrary expression (e.g. if you wanted a `threshold2` member to always be equal to `2*this.threshold1`).  This shouldn't be too hard; currently the parser is only about 100 lines long, and not terribly complex.
