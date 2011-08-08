@@ -59,9 +59,9 @@ Expression syntax is also allowed within generator functions, and this can provi
 
 The included gson-mode.el file provides basic syntax highlighting and indentation support for GenSON. To use this file, place it somewhere on your Emacs load path and then activate it with the following lines:
 
-(require 'gson-mode)
-(add-to-list 'auto-mode-alist '("\\.gson$" . gson-mode))
+    (require 'gson-mode)
+    (add-to-list 'auto-mode-alist '("\\.gson$" . gson-mode))
 
 You may wish to create a ~/.elisp directory for .el files and add the entire directory to your Emacs load path as follows:
 
-(add-to-list 'load-path "~/.elisp/")
+   (add-to-list 'load-path "~/.elisp/")
