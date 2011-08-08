@@ -36,3 +36,14 @@ GenSON values can also make reference to other keys elsewhere in the object.  An
 ## Future plans
 
 I'd like to add support for expressions (e.g. if you wanted a `threshold2` member to always be equal to `2*this.threshold1`).  This shouldn't be too hard; currently the parser is only about 100 lines long, and not terribly complex.
+
+## Text editor support
+
+The included gson-mode.el file provides basic syntax highlighting and indentation support for GenSON. To use this file, place it somewhere on your Emacs load path and then activate it with the following lines:
+
+(require 'gson-mode)
+(add-to-list 'auto-mode-alist '("\\.gson$" . gson-mode))
+
+You may wish to create a ~/.elisp directory for .el files and add the entire directory to your Emacs load path as follows:
+
+(add-to-list 'load-path "~/.elisp/")

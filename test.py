@@ -50,3 +50,11 @@ if __name__ == "__main__":
     
     for d in son_iterator:
         print d
+    print
+
+    print "Again, but from a formatted file:"
+    with open('test.gson') as f:
+        son_file_iterator = genson.load(f)
+
+    for d in son_iterator:
+        print d
