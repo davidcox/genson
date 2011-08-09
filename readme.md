@@ -16,7 +16,7 @@ resolves to six objects with `parameter1` drawn from a zero mean, unit variance 
 
     { "parameter2": < 1, 2, 3 > }
     
-resolves to three objects with `parameter2` equal to 1, 2, and 3, respectively, in each resulting object.  Combinations of sampling operations result in exhaustive crosses, such that
+resolves to three objects with `parameter2` equal to 1, 2, and 3, respectively, in each resulting object.  The `< >` operator is a shortcut for the `grid` generator function.  Combinations of sampling operations result in exhaustive crosses, such that
 
     { "parameter3": <1, 2, 3>,
       "parameter4": <4, 5, 6> }
@@ -27,7 +27,7 @@ GenSON also introduces tuple keys to JSON as a mechanism for specifying sampling
 
     { ("p6","p7","p8"): < (1,2,3), (4,5,6) > }
     
-produces two objects, wherein the first `p6`, `p7`, and `p8` are equal to 1,2 and 3, and in the second they are equal to 4,5, and 6, respectively. The `< >` operator is a shortcut for the `grid` generator function.
+produces two objects, wherein the first `p6`, `p7`, and `p8` are equal to 1,2 and 3, and in the second they are equal to 4,5, and 6, respectively. 
 
 As in JSON, values can be arbitrarily deeply nested, such that constructs like:
 
@@ -64,4 +64,6 @@ The included gson-mode.el file provides basic syntax highlighting and indentatio
 
 You may wish to create a ~/.elisp directory for .el files and add the entire directory to your Emacs load path as follows:
 
-   (add-to-list 'load-path "~/.elisp/")
+    (add-to-list 'load-path "~/.elisp/")
+
+  
