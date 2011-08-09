@@ -44,5 +44,5 @@ setup(
     install_requires=parse_requirements('requirements.txt'),
     dependency_links=parse_dependency_links('requirements.txt'),
 
-#    test_suite="nose.collector",
+    test_suite="nose.collector",
 )
