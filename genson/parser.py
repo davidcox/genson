@@ -69,6 +69,13 @@ def make_genson_function(name, gen_args=[], gen_kwargs={}):
     
     return g
 
+def dummy_token(name):
+    """  A allows for more sensible error reporting
+    """
+    exception_token = NoMatch()
+    exception_token.setName("valid " + name)
+    return exception_token
+
 
 TRUE = Keyword("true").setParseAction( replaceWith(True) )
 FALSE = Keyword("false").setParseAction( replaceWith(False) )
@@ -80,7 +87,7 @@ json_number = Combine( Optional('-') + ( '0' | Word('123456789',nums) ) +
                     Optional( Word('eE',exact=1) + Word(nums+'+-',nums) ) )
 
 genson_key_tuple = Forward()
-genson_key = ( json_string | genson_key_tuple )
+genson_key = (dummy_token("key") | json_string | genson_key_tuple )
 genson_key_tuple << Suppress('(') + delimitedList( genson_key ) + \
                          Suppress(')')
 genson_key_tuple.setParseAction(lambda x: tuple(x))
@@ -125,14 +132,14 @@ genson_grid_shorthand = Suppress("<") + \
 genson_grid_shorthand.setParseAction(lambda x: make_genson_function("grid", 
                                                                     x.args))
 
-genson_value << ( genson_value_tuple | genson_function | \
+genson_value << (genson_value_tuple | genson_function | \
                 genson_grid_shorthand | \
                 genson_ref | \
                 json_string | json_number | genson_object | \
                 json_array | TRUE | FALSE | NULL )
 
 
-genson_expression = operatorPrecedence( genson_value,
+genson_expression = (dummy_token("value") | operatorPrecedence( genson_value,
     [
      (Literal('^'), 2, opAssoc.RIGHT,   lambda x: x[0][0] ** x[0][2]),
      (Literal('-'), 1, opAssoc.RIGHT,    lambda x: -x[0][0]),
@@ -142,11 +149,12 @@ genson_expression = operatorPrecedence( genson_value,
      (Literal('+'), 2, opAssoc.LEFT,     lambda x: x[0][0] + x[0][2]),
      (Literal('-'), 2, opAssoc.LEFT,     lambda x: x[0][0] - x[0][2]),
      ]
-    )
+    ) )
 
 member_def = Group( genson_key + Suppress(':') + genson_expression )
 json_members = delimitedList( member_def )
-genson_object << Dict( Suppress('{') + Optional(json_members) + Suppress('}') )
+empty_doc = Suppress('{') + Suppress('}')
+genson_object << (Dict( Suppress('{') + json_members + Suppress('}') | empty_doc))
 
 json_comment = cppStyleComment 
 genson_object.ignore( json_comment )
