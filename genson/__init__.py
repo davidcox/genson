@@ -58,5 +58,4 @@ def loads(genson_string):
     parser = GENSONParser()
     genson_dict = parser.parse_string(genson_string)
     return JSONGenerator(genson_dict)
-    
 
