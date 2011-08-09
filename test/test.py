@@ -1,6 +1,15 @@
 import genson
 import time
 
+def parse_and_report_error(doc):
+    try:
+        son_iterator = genson.loads(doc)
+    except Exception as e:
+        print("Caught exception: %s" % e)
+        return
+    
+    print("Did not catch exception")
+
 if __name__ == "__main__":
     
     testdata = """
@@ -35,6 +44,30 @@ if __name__ == "__main__":
            ("test8","test9") : <("d", "e"), ("f", "g")>
         }
     """
+    
+    test_broken1 = """
+        {
+            // no key
+            4,
+            "test1" : 5
+        }
+    """
+    
+    test_broken2 = """
+        {
+            // no value
+            "test0" :,
+            "test1" : 5
+        }
+    """
+    
+    test_broken3 = """
+        {
+            // no comma
+            "test0" : 17
+            "test1" : 5
+        }
+    """
       
     tic = time.time()
     son_iterator1 = genson.loads(testdata2)
@@ -57,3 +90,8 @@ if __name__ == "__main__":
 
     for d in son_file_iterator:
         print d
+
+
+    parse_and_report_error(test_broken1)
+    parse_and_report_error(test_broken2)
+    parse_and_report_error(test_broken3)
