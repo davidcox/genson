@@ -66,4 +66,9 @@ You may wish to create a ~/.elisp directory for .el files and add the entire dir
 
     (add-to-list 'load-path "~/.elisp/")
 
-  
+## Python 2.4 - 2.6 support
+
+GenSON now depends on the OrderedDict collection that was introduced in Python 2.7. To run GenSON with Python 2.4 - 2.6, install the ordereddict package with pip or visit the following links:
+
+http://code.activestate.com/recipes/576693/
+http://pypi.python.org/pypi/ordereddict
