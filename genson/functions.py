@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import random
 from util import resolve
 from internal_ops import GenSONOperand
 
@@ -74,12 +73,11 @@ class GaussianRandomGenerator(ParameterGenerator):
         ParameterGenerator.__init__(self, draws, **kwargs)
         self.mean = mean
         self.stdev = stdev
-        self.random_seed = random_seed
+        self.random = np.random.RandomState(seed=random_seed)
 
     def __genson_eval__(self, context):
-        random.seed(resolve(self.random_seed, context))
-        return random.normal(resolve(self.mean, context),
-                             resolve(self.stdev, context))
+        return self.random.normal(resolve(self.mean, context),
+                                  resolve(self.stdev, context))
 
 registry['gaussian'] = GaussianRandomGenerator
 
@@ -90,11 +88,10 @@ class UniformRandomGenerator(ParameterGenerator):
         ParameterGenerator.__init__(self, draws, **kwargs)
         self.min = min
         self.max = max
-        self.random_seed = random_seed
+        self.random = np.random.RandomState(seed=random_seed)
 
     def __genson_eval__(self, context):
-        random.seed(resolve(self.random_seed, context))
-        return random.uniform(resolve(self.min, context),
-                              resolve(self.max, context))
+        return self.random.uniform(resolve(self.min, context),
+                                   resolve(self.max, context))
 
 registry['uniform'] = UniformRandomGenerator
