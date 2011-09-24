@@ -1,0 +1,3 @@
+{
+    "rseed_bug" : { "nested": gaussian(0, 1, draws=1, rseed=42) }
+}
