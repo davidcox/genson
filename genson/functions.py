@@ -1,7 +1,7 @@
 import numpy as np
 from numpy import random
-from util import *
-from internal_ops import *
+from util import resolve
+from internal_ops import GenSONOperand
 
 registry = {}
 
@@ -53,7 +53,7 @@ class ParameterGenerator(GenSONOperand):
         raise NotImplementedError()
 
 
-class GridGenerator (ParameterGenerator):
+class GridGenerator(ParameterGenerator):
 
     def __init__(self, *values, **kwargs):
         draws = kwargs.get('draws', None)
@@ -68,28 +68,32 @@ class GridGenerator (ParameterGenerator):
 registry['grid'] = GridGenerator
 
 
-class GaussianRandomGenerator (ParameterGenerator):
+class GaussianRandomGenerator(ParameterGenerator):
 
-    def __init__(self, mean, stdev, draws=1, **kwargs):
+    def __init__(self, mean, stdev, draws=1, random_seed=None, **kwargs):
         ParameterGenerator.__init__(self, draws, **kwargs)
         self.mean = mean
         self.stdev = stdev
+        self.random_seed = random_seed
 
     def __genson_eval__(self, context):
+        random.seed(resolve(self.random_seed, context))
         return random.normal(resolve(self.mean, context),
                              resolve(self.stdev, context))
 
 registry['gaussian'] = GaussianRandomGenerator
 
 
-class UniformRandomGenerator (ParameterGenerator):
+class UniformRandomGenerator(ParameterGenerator):
 
-    def __init__(self, min, max, draws=1, **kwargs):
+    def __init__(self, min, max, draws=1, random_seed=None, **kwargs):
         ParameterGenerator.__init__(self, draws, **kwargs)
         self.min = min
         self.max = max
+        self.random_seed = random_seed
 
     def __genson_eval__(self, context):
+        random.seed(resolve(self.random_seed, context))
         return random.uniform(resolve(self.min, context),
                               resolve(self.max, context))
 
