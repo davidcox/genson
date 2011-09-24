@@ -68,9 +68,13 @@ def make_genson_function(name, gen_args=[], gen_kwargs={}):
     generator_class = functions.registry.get(name, None)
     if generator_class is None:
         raise Exception('Unknown generator class: %s' % name)
-    
+
     if type(gen_kwargs) is ParseResults:
         gen_kwargs = gen_kwargs.asList()
+        gen_kwargs = gen_kwargs[0]
+        assert len(gen_kwargs) % 2 == 0
+        gen_kwargs = zip(gen_kwargs[::2], gen_kwargs[1::2])
+
     gen_kwargs = dict(gen_kwargs)
     
     g = generator_class(*gen_args, **gen_kwargs)
