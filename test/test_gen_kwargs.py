@@ -1,8 +1,5 @@
 import genson
 
-from os import path
-my_path = path.dirname(path.abspath(__file__))
-
 def test_multi_gen_kwargs():
     gson = \
     """
