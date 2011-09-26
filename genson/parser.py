@@ -128,7 +128,7 @@ genson_ref.setParseAction(lambda x: ScopedReference(x.asList()))
 
 genson_kwargs = Group(delimitedList( Word(alphas + '_') + Suppress("=") + \
                               genson_value ))
-genson_function =  Word(alphas)("name") + \
+genson_function =  Word(alphas + '_')("name") + \
                     Suppress('(') + \
                     Optional(json_elements)("args") + \
                     Optional(Suppress(',')) +\
