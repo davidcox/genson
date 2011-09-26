@@ -4,9 +4,9 @@
 #
 #
 genson_bnf = """
-object 
-    { members } 
-    {} 
+object
+    { members }
+    {}
 key
     string
     key_tuple
@@ -15,17 +15,17 @@ key_tuple
 key_list
     string
     key_list, string
-members 
-    key : value 
+members
+    key : value
     members , key : value
 value_tuple
     ( elements )
     ()
-array 
+array
     [ elements ]
-    [] 
-elements 
-    value 
+    []
+elements
+    value
     elements , value
 generator
     kw ()
@@ -37,7 +37,7 @@ args
 kwargs
     kw = value
     kwargs , kw = value
-value 
+value
     string
     number
     object
@@ -68,13 +68,17 @@ def make_genson_function(name, gen_args=[], gen_kwargs={}):
     generator_class = functions.registry.get(name, None)
     if generator_class is None:
         raise Exception('Unknown generator class: %s' % name)
-    
+
     if type(gen_kwargs) is ParseResults:
         gen_kwargs = gen_kwargs.asList()
+        gen_kwargs = gen_kwargs[0]
+        assert len(gen_kwargs) % 2 == 0
+        gen_kwargs = zip(gen_kwargs[::2], gen_kwargs[1::2])
+
     gen_kwargs = dict(gen_kwargs)
-    
+
     g = generator_class(*gen_args, **gen_kwargs)
-    
+
     return g
 
 def dummy_token(name):
@@ -118,26 +122,26 @@ genson_running_scope = ( PARENT | genson_unquoted_key )
 genson_ref =  genson_initial_scope + \
                    Suppress('.') + \
                    delimitedList(genson_running_scope, '.')
-                   
-genson_ref.setParseAction(lambda x: ScopedReference(x.asList()))
-                   
 
-genson_kwargs = Group(delimitedList( Word(alphas) + Suppress("=") + \
+genson_ref.setParseAction(lambda x: ScopedReference(x.asList()))
+
+
+genson_kwargs = Group(delimitedList( Word(alphas + '_') + Suppress("=") + \
                               genson_value ))
 genson_function =  Word(alphas)("name") + \
                     Suppress('(') + \
                     Optional(json_elements)("args") + \
                     Optional(Suppress(',')) +\
                     Optional(genson_kwargs)("kwargs") + \
-                    Suppress(')') 
-genson_function.setParseAction(lambda x: make_genson_function(x.name, 
-                                                              x.args, 
+                    Suppress(')')
+genson_function.setParseAction(lambda x: make_genson_function(x.name,
+                                                              x.args,
                                                               x.kwargs))
 
 genson_grid_shorthand = Suppress("<") + \
                        json_elements("args") + \
-                       Suppress(">") 
-genson_grid_shorthand.setParseAction(lambda x: make_genson_function("grid", 
+                       Suppress(">")
+genson_grid_shorthand.setParseAction(lambda x: make_genson_function("grid",
                                                                     x.args))
 
 genson_value << (genson_value_tuple | genson_function | \
@@ -164,7 +168,7 @@ json_members = delimitedList( member_def )
 empty_doc = Suppress('{') + Suppress('}')
 genson_object << (Dict( Suppress('{') + json_members + Suppress('}') | empty_doc))
 
-json_comment = cppStyleComment 
+json_comment = cppStyleComment
 genson_object.ignore( json_comment )
 
 def clean_dict(x):
@@ -179,14 +183,14 @@ def convert_numbers(s,l,toks):
         return int(n)
     except ValueError, ve:
         return float(n)
-        
+
 json_number.setParseAction( convert_numbers )
-    
+
 class GENSONParser:
     def __init__(self):
         self.grammar = genson_object
         self.grammar.enablePackrat()
-    
+
     def parse_string(self, genson_string):
         result = self.grammar.parseString(genson_string)
         return result.asList()[0]

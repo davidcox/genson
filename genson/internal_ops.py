@@ -5,12 +5,12 @@ class GenSONBinaryOp:
         self.a = a
         self.b = b
         self.op = op
-    
+
     def __genson_eval__(self, context):
-        
+
         res_a = resolve(self.a, context)
         res_b = resolve(self.b, context)
-        
+
         if self.op is '+':
             return res_a + res_b
         elif self.op is '-':
@@ -26,9 +26,9 @@ class GenSONUnaryOp:
     def __init__(self, a, op):
         self.a = a
         self.op = op
-    
+
     def __genson_eval__(self, context):
-        
+
         res_a = resolve(self.a, context)
         if self.op is '+':
             return res_a
@@ -66,13 +66,13 @@ def quicky_populate(cls, method_list):
     for m in method_list:
         source = GenSONOperand.__dict__[m]
         cls.__dict__[m] = source
- 
+
 op_list = [  '__add__', '__radd__',
              '__sub__', '__rsub__',
              '__mul__', '__rmul__',
              '__div__', '__rdiv__',
              '__pos__', '__neg__',
              '__pow__', '__rpow__']
-             
+
 quicky_populate(GenSONBinaryOp, op_list)
 quicky_populate(GenSONUnaryOp, op_list)
