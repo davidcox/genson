@@ -96,7 +96,8 @@ class UniformRandomGenerator(ParameterGenerator):
 
 registry['uniform'] = UniformRandomGenerator
 
-class RandomChoiceGenerator(ParameterGenerator):
+
+class ChoiceRandomGenerator(ParameterGenerator):
 
     def __init__(self, vals, draws=1, random_seed=None, **kwargs):
         ParameterGenerator.__init__(self, draws, **kwargs)
@@ -106,4 +107,4 @@ class RandomChoiceGenerator(ParameterGenerator):
     def __genson_eval__(self, context):
         return self.vals[self.random.randint(len(self.vals))]
 
-registry['choice'] = RandomChoiceGenerator
+registry['choice'] = ChoiceRandomGenerator
