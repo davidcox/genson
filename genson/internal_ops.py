@@ -1,4 +1,4 @@
-from util import resolve
+from util import resolve, genson_dumps
 
 class GenSONBinaryOp:
     def __init__(self,a,b,op):
@@ -21,6 +21,11 @@ class GenSONBinaryOp:
             return res_a / res_b
         elif self.op is '**':
             return res_a / res_b
+    
+    def __genson_repr__(self, pp=False, d=0):
+        return "%s %s %s" % (genson_dumps(self.a), 
+                             self.op, 
+                             genson_dumps(self.b))
 
 class GenSONUnaryOp:
     def __init__(self, a, op):
@@ -34,6 +39,9 @@ class GenSONUnaryOp:
             return res_a
         if self.op is '-':
             return -res_a
+    
+    def __genson_repr__(self, pp=False, d=0):
+        return "%s %s" % (self.op, genson_dumps(self.a))
 
 class GenSONOperand:
     def __add__(self, other):

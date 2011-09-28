@@ -13,7 +13,8 @@ def isiterable(x):
 def isgensonevaluable(x):
     return getattr(x, '__genson_eval__', False)
 
-
+def isgensondumpable(x):
+    return getattr(x, '__genson_repr__', False)
 
 
 def resolve(x, context = []):
@@ -47,9 +48,6 @@ def resolve(x, context = []):
         context.pop()
 
         return return_dict
-    # elif isgensonref(x):
-    #     val = resolve_scoped_reference(copy.deepcopy(x), copy.copy(context))
-    #     return resolve( val, context )
 
     elif istuple(x):
         return_list = []
@@ -63,3 +61,36 @@ def resolve(x, context = []):
         return return_list
     else:
         return x
+
+
+def genson_dumps(o, prettyprint=False, depth=0):
+    
+    if isgensondumpable(o):
+        return o.__genson_repr__(prettyprint, depth)
+    
+    elif isdict(o):
+        
+        element_strs = ['"%s" : %s' % genson_dumps(x,prettyprint,depth+1) \
+                        for x in o.items() ]
+        
+        return_str = ''
+        if prettyprint:
+            tabs = '\t' * depth
+            return_str += '{\n' + tabs + '\t'
+            return_str += (",\n" + tabs + "\t").join(element_strs)
+            # for e in element_strs:
+            #     return_str += tabs + '\t' + e + '\n'
+            return_str += '\n' + tabs + '}'
+        else:
+            return_str = "{%s}" % ",".join(element_strs)
+        return return_str
+        
+    elif istuple(o):
+        return tuple([genson_dumps(x,prettyprint,depth) for x in o])
+    elif isiterable(o):
+        return [genson_dumps(x,prettyprint,depth) for x in o]
+    else:
+        return str(o)
+        
+        
+        

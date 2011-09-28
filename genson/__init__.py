@@ -59,3 +59,8 @@ def loads(genson_string):
     genson_dict = parser.parse_string(genson_string)
     return JSONGenerator(genson_dict)
 
+def dumps(generator, prettyprint=False):
+    if isdict(generator):
+        return genson_dumps(generator, prettyprint)
+    else:
+        return genson_dumps(generator.genson_dict, prettyprint)

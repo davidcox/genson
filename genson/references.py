@@ -1,5 +1,5 @@
 from internal_ops import GenSONOperand
-from util import resolve, isdict
+from util import resolve, isdict, genson_dumps
 import copy
 
 def resolve_scoped_reference(ref, context):
@@ -51,3 +51,6 @@ class ScopedReference (GenSONOperand):
     def __genson_eval__(self, context):
         return resolve_scoped_reference( copy.deepcopy(self.scope_list),
                                          copy.copy(context) )
+    
+    def __genson_repr__(self, pp=False, d=0):
+        return ".".join(self.scope_list)
