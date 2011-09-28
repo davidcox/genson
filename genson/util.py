@@ -70,8 +70,15 @@ def genson_dumps(o, prettyprint=False, depth=0):
     
     elif isdict(o):
         
-        element_strs = ['"%s" : %s' % genson_dumps(x,prettyprint,depth+1) \
-                        for x in o.items() ]
+        element_strs = []
+        for k,v in o.items():
+            if isiterable(k):
+                element_strs.append('(%s) : %s' % \
+                                    (",".join(['"%s"' % x for x in k]),
+                                    genson_dumps(v, prettyprint, depth+1)))
+            else:
+                element_strs.append('"%s" : %s' % \
+                                    (k, genson_dumps(v, prettyprint, depth+1)))
         
         return_str = ''
         if prettyprint:
