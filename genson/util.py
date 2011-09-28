@@ -63,10 +63,10 @@ def resolve(x, context = []):
         return x
 
 
-def genson_dumps(o, prettyprint=False, depth=0):
+def genson_dumps(o, pretty_print=False, depth=0):
     
     if isgensondumpable(o):
-        return o.__genson_repr__(prettyprint, depth)
+        return o.__genson_repr__(pretty_print, depth)
     
     elif isdict(o):
         
@@ -75,27 +75,26 @@ def genson_dumps(o, prettyprint=False, depth=0):
             if isiterable(k):
                 element_strs.append('(%s) : %s' % \
                                     (",".join(['"%s"' % x for x in k]),
-                                    genson_dumps(v, prettyprint, depth+1)))
+                                    genson_dumps(v, pretty_print, depth+1)))
             else:
                 element_strs.append('"%s" : %s' % \
-                                    (k, genson_dumps(v, prettyprint, depth+1)))
+                                    (k, genson_dumps(v, pretty_print, depth+1)))
         
         return_str = ''
-        if prettyprint:
+        if pretty_print:
             tabs = '\t' * depth
             return_str += '{\n' + tabs + '\t'
             return_str += (",\n" + tabs + "\t").join(element_strs)
-            # for e in element_strs:
-            #     return_str += tabs + '\t' + e + '\n'
+            
             return_str += '\n' + tabs + '}'
         else:
             return_str = "{%s}" % ",".join(element_strs)
         return return_str
         
     elif istuple(o):
-        return tuple([genson_dumps(x,prettyprint,depth) for x in o])
+        return tuple([genson_dumps(x,pretty_print,depth) for x in o])
     elif isiterable(o):
-        return [genson_dumps(x,prettyprint,depth) for x in o]
+        return [genson_dumps(x,pretty_print,depth) for x in o]
     else:
         return str(o)
         

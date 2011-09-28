@@ -23,10 +23,10 @@ class GenSONFunction(GenSONOperand):
 
         return self.fun(*resolved_args, **resolved_kwargs)
     
-    def __genson_repr__(self, pp=False, d=0):
-        arg_list = genson_dumps(self.args,pp,0)
-        kwarg_list = ["%s=%s" % genson_dumps(x,pp,d) for x \
-                                                     in self.kwargs.items()]
+    def __genson_repr__(self, pretty_print=False, depth=0):
+        arg_list = genson_dumps(self.args,pretty_print,0)
+        kwarg_list = ["%s=%s" % genson_dumps(x,pretty_print,depth) 
+                      for x in self.kwargs.items()]
         arg_str = ",".join(arg_list + tuple(kwarg_list))
         
         return "%s(%s)" % (self.name, arg_str)
@@ -73,7 +73,7 @@ class GridGenerator(ParameterGenerator):
     def __genson_eval__(self, context):
         return self.values[self.counter]
         
-    def __genson_repr__(self,pp=False,d=0):
+    def __genson_repr__(self,pretty_print=False,depth=0):
         
         vals = [str(x) for x in genson_dumps(self.values)]
         val_str = ",".join(vals)
@@ -89,8 +89,8 @@ registry['grid'] = GridGenerator
 def genson_call_str(name, *args, **kwargs):
 
     g_args = genson_dumps(args)
-    g_kwargs = ["%s=%s" % genson_dumps(x) for x in kwargs.items() \
-                                          if x[1] is not None]
+    g_kwargs = ["%s=%s" % genson_dumps(x) 
+                for x in kwargs.items() if x[1] is not None]
     
     return "%s(%s)" % (name, ",".join(g_args + tuple(g_kwargs)))
 
@@ -107,7 +107,7 @@ class GaussianRandomGenerator(ParameterGenerator):
         return self.random.normal(resolve(self.mean, context),
                                   resolve(self.stdev, context))
                                   
-    def __genson_repr__(self, pp=False,d=0):
+    def __genson_repr__(self, pretty_print=False,depth=0):
         return genson_call_str('gaussian', self.mean, self.stdev,
                                draws=self.draws, random_seed=self.random_seed)
         
@@ -128,7 +128,7 @@ class UniformRandomGenerator(ParameterGenerator):
         return self.random.uniform(resolve(self.min, context),
                                    resolve(self.max, context))
 
-    def __genson_repr__(self, pp=False,d=0):
+    def __genson_repr__(self, pretty_print=False,depth=0):
         return genson_call_str('uniform', self.min, self.max,
                                draws=self.draws, random_seed=self.random_seed)
 
@@ -146,7 +146,7 @@ class ChoiceRandomGenerator(ParameterGenerator):
     def __genson_eval__(self, context):
         return self.vals[self.random.randint(len(self.vals))]
 
-    def __genson_repr__(self, pp=False,d=0):
+    def __genson_repr__(self, pretty_print=False,depth=0):
         return genson_call_str('choice', *self.vals,
                                draws=self.draws, random_seed=self.random_seed)
         

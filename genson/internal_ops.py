@@ -22,7 +22,7 @@ class GenSONBinaryOp:
         elif self.op is '**':
             return res_a / res_b
     
-    def __genson_repr__(self, pp=False, d=0):
+    def __genson_repr__(self, pretty_print=False, depth=0):
         return "%s %s %s" % (genson_dumps(self.a), 
                              self.op, 
                              genson_dumps(self.b))
@@ -40,7 +40,7 @@ class GenSONUnaryOp:
         if self.op is '-':
             return -res_a
     
-    def __genson_repr__(self, pp=False, d=0):
+    def __genson_repr__(self, pretty_print=False, depth=0):
         return "%s %s" % (self.op, genson_dumps(self.a))
 
 class GenSONOperand:

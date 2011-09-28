@@ -27,7 +27,9 @@ def test_dumps():
     gen = genson.loads(gson)
     
     print genson.dumps(gen)
-    print genson.dumps(gen, prettyprint=True)
+    print genson.dumps(gen, pretty_print=True)
+    
+    # TODO: obviously, more needed here
 
 if __name__ == "__main__":
     

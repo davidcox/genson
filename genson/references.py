@@ -52,5 +52,5 @@ class ScopedReference (GenSONOperand):
         return resolve_scoped_reference( copy.deepcopy(self.scope_list),
                                          copy.copy(context) )
     
-    def __genson_repr__(self, pp=False, d=0):
+    def __genson_repr__(self, pretty_print=False, depth=0):
         return ".".join(self.scope_list)
