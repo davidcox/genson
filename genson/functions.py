@@ -95,3 +95,16 @@ class UniformRandomGenerator(ParameterGenerator):
                                    resolve(self.max, context))
 
 registry['uniform'] = UniformRandomGenerator
+
+
+class ChoiceRandomGenerator(ParameterGenerator):
+
+    def __init__(self, vals, draws=1, random_seed=None, **kwargs):
+        ParameterGenerator.__init__(self, draws, **kwargs)
+        self.vals = vals
+        self.random = np.random.RandomState(seed=random_seed)
+
+    def __genson_eval__(self, context):
+        return self.vals[self.random.randint(len(self.vals))]
+
+registry['choice'] = ChoiceRandomGenerator
