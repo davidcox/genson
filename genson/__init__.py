@@ -14,11 +14,15 @@ class JSONGenerator:
         self.first_run = True
 
     def find_generators(self, d):
-        vals = d.values()
+        if isdict(d):
+            vals = d.values()
+        elif isiterable(d):
+            vals = d
+        
         for v in vals:
             if isinstance(v, ParameterGenerator):
                 self.generators.append(v)
-            if isdict(v):
+            if isdict(v) or isiterable(v):
                 self.find_generators(v)
 
     def __iter__(self):
