@@ -1,6 +1,15 @@
 # import references
 import copy
 
+default_random_seed = None
+
+def set_global_seed(new_seed):
+    global default_random_seed
+    default_random_seed = new_seed
+    
+def get_global_seed():
+    global default_random_seed
+    return default_random_seed
 
 def isdict(x):
     return isinstance(x, dict)
