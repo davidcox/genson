@@ -75,7 +75,7 @@ def test_main():
     """
 
     tic = time.time()
-    son_iterator1 = genson.loads(testdata2)
+    genson.loads(testdata2)
     toc = time.time() - tic
     print("Simple example parse time: %s" % toc)
 
@@ -89,7 +89,7 @@ def test_main():
     print
 
     print "Again, but from a formatted file:"
-    with open(path.join(my_path, 'test.gson')) as f:
+    with open(path.join(my_path, 'test_basic.gson')) as f:
         son_file_iterator = genson.load(f)
 
     for d in son_file_iterator:

@@ -55,15 +55,19 @@ from pyparsing import *
 from functions import *
 from references import ScopedReference
 import functions
+from warnings import warn
+
 try:
     from collections import OrderedDict
 except ImportError:
     print "Python 2.7+ OrderedDict collection not available"
     try:
         from ordereddict import OrderedDict
-        print "Using backported OrderedDict implementation"
+        warn("Using backported OrderedDict implementation")
     except ImportError:
-        print "Backported OrderedDict implementation not available"
+        raise ImportError("Backported OrderedDict implementation "
+                          "not available. To install it: "
+                          "'pip install -vUI ordereddict'")
 
 # a simple helper functions
 def make_genson_function(name, gen_args=[], gen_kwargs={}):
