@@ -5,6 +5,9 @@
 #
 genson_bnf = """
 object
+    dict
+    array
+dict
     { members }
     {}
 key
@@ -52,15 +55,19 @@ from pyparsing import *
 from functions import *
 from references import ScopedReference
 import functions
+from warnings import warn
+
 try:
     from collections import OrderedDict
 except ImportError:
     print "Python 2.7+ OrderedDict collection not available"
     try:
         from ordereddict import OrderedDict
-        print "Using backported OrderedDict implementation"
+        warn("Using backported OrderedDict implementation")
     except ImportError:
-        print "Backported OrderedDict implementation not available"
+        raise ImportError("Backported OrderedDict implementation "
+                          "not available. To install it: "
+                          "'pip install -vUI ordereddict'")
 
 # a simple helper functions
 def make_genson_function(name, gen_args=[], gen_kwargs={}):
@@ -104,7 +111,7 @@ genson_key_tuple << Suppress('(') + delimitedList( genson_key ) + \
                          Suppress(')')
 genson_key_tuple.setParseAction(lambda x: tuple(x))
 
-genson_object = Forward()
+genson_dict = Forward()
 genson_value = Forward()
 json_elements = delimitedList( genson_value )
 json_array = Group(Suppress('[') + Optional(json_elements) + Suppress(']') )
@@ -147,7 +154,7 @@ genson_grid_shorthand.setParseAction(lambda x: make_genson_function("grid",
 genson_value << (genson_value_tuple | genson_function | \
                 genson_grid_shorthand | \
                 genson_ref | \
-                json_string | json_number | genson_object | \
+                json_string | json_number | genson_dict | \
                 json_array | TRUE | FALSE | NULL )
 
 
@@ -166,7 +173,9 @@ genson_expression = (dummy_token("value") | operatorPrecedence( genson_value,
 member_def = Group( genson_key + Suppress(':') + genson_expression )
 json_members = delimitedList( member_def )
 empty_doc = Suppress('{') + Suppress('}')
-genson_object << (Dict( Suppress('{') + json_members + Suppress('}') | empty_doc))
+genson_dict << (Dict( Suppress('{') + json_members + Suppress('}') | empty_doc))
+
+genson_object = (genson_dict | json_array | genson_value_tuple)
 
 json_comment = cppStyleComment
 genson_object.ignore( json_comment )
@@ -175,7 +184,7 @@ def clean_dict(x):
     x_list = x.asList()
     return OrderedDict(x_list)
 
-genson_object.setParseAction(clean_dict)
+genson_dict.setParseAction(clean_dict)
 
 def convert_numbers(s,l,toks):
     n = toks[0]
