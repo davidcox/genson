@@ -4,7 +4,7 @@ def test_multi_gen_kwargs():
     gson = \
     """
     {
-        "multi_gen_kwargs_bug" : { "nested": gaussian(0, 1, draws=1, rseed=42) }
+        "multi_gen_kwargs_bug" : { "nested": gaussian(0, 1, draws=1, random_seed=42) }
     }
     """
     genson.loads(gson)

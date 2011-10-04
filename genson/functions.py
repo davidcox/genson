@@ -80,8 +80,9 @@ class ParameterGenerator(GenSONOperand):
 class GridGenerator(ParameterGenerator):
 
     def __init__(self, *values, **kwargs):
-        draws = kwargs.get('draws', None)
-        ParameterGenerator.__init__(self, draws, **kwargs)
+        draws = kwargs.pop('draws', None)
+        assert_kwargs_consumed(kwargs)
+        ParameterGenerator.__init__(self, draws)
         self.values = values
         if self.draws is None:
             self.draws = len(self.values)
@@ -112,8 +113,8 @@ def genson_call_str(name, *args, **kwargs):
 
 class GaussianRandomGenerator(ParameterGenerator):
 
-    def __init__(self, mean, stdev, draws=1, **kwargs):
-        ParameterGenerator.__init__(self, draws, **kwargs)
+    def __init__(self, mean, stdev, draws=1):
+        ParameterGenerator.__init__(self, draws)
         self.mean = mean
         self.stdev = stdev
         
@@ -131,8 +132,8 @@ registry['gaussian'] = GaussianRandomGenerator
 
 class UniformRandomGenerator(ParameterGenerator):
 
-    def __init__(self, min, max, draws=1, **kwargs):
-        ParameterGenerator.__init__(self, draws, **kwargs)
+    def __init__(self, min, max, draws=1):
+        ParameterGenerator.__init__(self, draws)
         self.min = min
         self.max = max
 
@@ -149,8 +150,8 @@ registry['uniform'] = UniformRandomGenerator
 
 class ChoiceRandomGenerator(ParameterGenerator):
 
-    def __init__(self, vals, draws=1, **kwargs):
-        ParameterGenerator.__init__(self, draws, **kwargs)
+    def __init__(self, vals, draws=1):
+        ParameterGenerator.__init__(self, draws)
         self.vals = vals
         
 
