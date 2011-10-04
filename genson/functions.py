@@ -1,5 +1,5 @@
 import numpy as np
-from util import resolve, genson_dumps
+from util import resolve, genson_dumps, assert_kwargs_consumed
 from internal_ops import GenSONOperand
 
 registry = {}
@@ -60,16 +60,19 @@ class ParameterGenerator(GenSONOperand):
     def __genson_eval__(self, context):
         raise NotImplementedError()
 
+            
 
 class GridGenerator(ParameterGenerator):
 
     def __init__(self, *values, **kwargs):
-        draws = kwargs.get('draws', None)
+        draws = kwargs.pop('draws', None)
         ParameterGenerator.__init__(self, draws, **kwargs)
         self.values = values
         if self.draws is None:
             self.draws = len(self.values)
-
+        
+        assert_kwargs_consumed(kwargs)    
+        
     def __genson_eval__(self, context):
         return self.values[self.counter]
 
@@ -102,6 +105,8 @@ class GaussianRandomGenerator(ParameterGenerator):
         self.stdev = stdev
         self.random_seed = random_seed
         self.random = np.random.RandomState(seed=random_seed)
+        
+        assert_kwargs_consumed(kwargs)
 
     def __genson_eval__(self, context):
         return self.random.normal(resolve(self.mean, context),
@@ -123,6 +128,8 @@ class UniformRandomGenerator(ParameterGenerator):
         self.max = max
         self.random_seed = random_seed
         self.random = np.random.RandomState(seed=random_seed)
+        
+        assert_kwargs_consumed(kwargs)
 
     def __genson_eval__(self, context):
         return self.random.uniform(resolve(self.min, context),
@@ -142,6 +149,8 @@ class ChoiceRandomGenerator(ParameterGenerator):
         self.vals = vals
         self.random_seed = random_seed
         self.random = np.random.RandomState(seed=random_seed)
+        
+        assert_kwargs_consumed(kwargs)
 
     def __genson_eval__(self, context):
         return self.vals[self.random.randint(len(self.vals))]

@@ -97,6 +97,14 @@ def genson_dumps(o, pretty_print=False, depth=0):
         return [genson_dumps(x,pretty_print,depth) for x in o]
     else:
         return str(o)
-        
-        
-        
+
+def kwargs_consumed(f):
+    def wrapper(self, *args, **kwargs):
+        f(self, *args, **kwargs)
+        assert_kwargs_consumed(kwargs)
+    return wrapper
+
+def assert_kwargs_consumed(kwargs):
+    if len(kwargs) > 0:
+        raise ValueError(('Unknown keyword arguments: %s' % 
+                          ', '.join(kwargs.keys())))
