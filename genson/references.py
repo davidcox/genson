@@ -54,3 +54,7 @@ class ScopedReference (GenSONOperand):
     
     def __genson_repr__(self, pretty_print=False, depth=0):
         return ".".join(self.scope_list)
+
+def ref(ref_str):
+    "A helper to convert a genson ref string into a SopeReference object"
+    return ScopedReference(ref_str.split('.'))
