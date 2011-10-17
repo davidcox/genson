@@ -43,6 +43,7 @@ register_function('tan', np.tan)
 
 
 class ParameterGenerator(GenSONOperand):
+
     def __init__(self, draws=1, random_seed=None):
         self.draws = draws
         self.counter = 0
@@ -56,8 +57,7 @@ class ParameterGenerator(GenSONOperand):
 
     def seed(self, new_seed=None):
         if new_seed is not None:
-            self.random_seed = seed
-            seed = new_seed
+            seed = self.random_seed = new_seed
         elif self.random_seed is None:
             seed = get_global_seed()
         else:
@@ -83,7 +83,7 @@ class GridGenerator(ParameterGenerator):
         random_seed = kwargs.pop('random_seed', None)
         assert_kwargs_consumed(kwargs)
 
-        ParameterGenerator.__init__(self, draws, random_seed)
+        ParameterGenerator.__init__(self, draws=draws, random_seed=random_seed)
 
         self.values = values
         if self.draws is None:
@@ -119,7 +119,7 @@ def genson_call_str(name, *args, **kwargs):
 class GaussianRandomGenerator(ParameterGenerator):
 
     def __init__(self, mean, stdev, draws=1, random_seed=None):
-        ParameterGenerator.__init__(self, draws, random_seed=None)
+        ParameterGenerator.__init__(self, draws=draws, random_seed=random_seed)
         self.mean = mean
         self.stdev = stdev
 
@@ -138,7 +138,7 @@ registry['gaussian'] = GaussianRandomGenerator
 class UniformRandomGenerator(ParameterGenerator):
 
     def __init__(self, min, max, draws=1, random_seed=None):
-        ParameterGenerator.__init__(self, draws, random_seed)
+        ParameterGenerator.__init__(self, draws=draws, random_seed=random_seed)
         self.min = min
         self.max = max
 
@@ -156,7 +156,7 @@ registry['uniform'] = UniformRandomGenerator
 class ChoiceRandomGenerator(ParameterGenerator):
 
     def __init__(self, vals, draws=1, random_seed=None):
-        ParameterGenerator.__init__(self, draws, random_seed)
+        ParameterGenerator.__init__(self, draws=draws, random_seed=random_seed)
         self.vals = vals
 
     def __genson_eval__(self, context):
