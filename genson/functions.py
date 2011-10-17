@@ -138,6 +138,26 @@ class GaussianRandomGenerator(ParameterGenerator):
 registry['gaussian'] = GaussianRandomGenerator
 
 
+from hyperopt import ht_dist2
+class GaussianRandomGeneratorHyperopt(ParameterGenerator):
+
+    def __init__(self, mean, stdev, draws=1, random_seed=None, size=1):
+        ParameterGenerator.__init__(self, draws, random_seed=None)
+        self.mean = mean
+        self.stdev = stdev
+        self.size = size
+
+    def __genson_eval__(self, context):
+        return np.tile([ht_dist2.normal(resolve(self.mean,context),resolve(self.stdev,context))],
+                       resolve(self.size,context))
+
+    def __genson_repr__(self, pretty_print=False,depth=0):
+        return genson_call_str('gaussian_hyperopt', self.mean, self.stdev,
+                               draws=self.draws, random_seed=self.random_seed)
+                               
+registry['gaussian_hyperopt'] = GaussianRandomGeneratorHyperopt
+
+
 class UniformRandomGenerator(ParameterGenerator):
 
     def __init__(self, min, max, draws=1, random_seed=None, size=1):
