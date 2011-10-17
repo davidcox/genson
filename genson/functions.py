@@ -74,7 +74,7 @@ class ParameterGenerator(GenSONOperand):
         return True
 
     def __genson_eval__(self, context):
-        raise NotImplementedError()
+        raise NotImplementedError() 
 
             
 
@@ -119,33 +119,37 @@ def genson_call_str(name, *args, **kwargs):
 
 class GaussianRandomGenerator(ParameterGenerator):
 
-    def __init__(self, mean, stdev, draws=1, random_seed=None):
+    def __init__(self, mean, stdev, draws=1, random_seed=None, size=1):
         ParameterGenerator.__init__(self, draws, random_seed=None)
         self.mean = mean
         self.stdev = stdev
+        self.size = size
 
     def __genson_eval__(self, context):
         return self.random.normal(resolve(self.mean, context),
-                                  resolve(self.stdev, context))
+                                  resolve(self.stdev, context),
+                                  size=resolve(self.size,context))
 
     def __genson_repr__(self, pretty_print=False,depth=0):
         return genson_call_str('gaussian', self.mean, self.stdev,
                                draws=self.draws, random_seed=self.random_seed)
-
+                               
 
 registry['gaussian'] = GaussianRandomGenerator
 
 
 class UniformRandomGenerator(ParameterGenerator):
 
-    def __init__(self, min, max, draws=1, random_seed=None):
-        ParameterGenerator.__init__(self, draws, random_seed)
+    def __init__(self, min, max, draws=1, random_seed=None, size=1):
+        ParameterGenerator.__init__(self, draws, random_seed=None)
         self.min = min
         self.max = max
+        self.size = size
 
     def __genson_eval__(self, context):
         return self.random.uniform(resolve(self.min, context),
-                                   resolve(self.max, context))
+                                   resolve(self.max, context),
+                                   size=resolve(self.size,context))
 
     def __genson_repr__(self, pretty_print=False,depth=0):
         return genson_call_str('uniform', self.min, self.max,
@@ -156,12 +160,16 @@ registry['uniform'] = UniformRandomGenerator
 
 class ChoiceRandomGenerator(ParameterGenerator):
 
-    def __init__(self, vals, draws=1, random_seed=None):
-        ParameterGenerator.__init__(self, draws, random_seed)
+    def __init__(self, vals, draws=1, random_seed=None, size=1):
+        ParameterGenerator.__init__(self, draws, random_seed=random_seed)
         self.vals = vals
+        self.size = size
 
     def __genson_eval__(self, context):
-        return self.vals[self.random.randint(len(self.vals))]
+        if self.size == 1:
+            return self.vals[self.random.randint(len(self.vals))]
+        else:
+            return [self.vals[r] for r in self.random.randint(len(self.vals),size=self.size)]
 
     def __genson_repr__(self, pretty_print=False,depth=0):
         return genson_call_str('choice', *self.vals,
