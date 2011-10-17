@@ -126,9 +126,14 @@ class GaussianRandomGenerator(ParameterGenerator):
         self.size = size
 
     def __genson_eval__(self, context):
-        return self.random.normal(resolve(self.mean, context),
+        size=resolve(self.size,context)
+        if size != 1:
+            return self.random.normal(resolve(self.mean, context),
                                   resolve(self.stdev, context),
-                                  size=resolve(self.size,context))
+                                  size=size)       
+        else:
+            return self.random.normal(resolve(self.mean, context),
+                                      resolve(self.stdev, context))
 
     def __genson_repr__(self, pretty_print=False,depth=0):
         return genson_call_str('gaussian', self.mean, self.stdev,
@@ -147,9 +152,15 @@ class UniformRandomGenerator(ParameterGenerator):
         self.size = size
 
     def __genson_eval__(self, context):
-        return self.random.uniform(resolve(self.min, context),
+        size=resolve(self.size,context)
+        if size != 1:
+            return self.random.uniform(resolve(self.min, context),
                                    resolve(self.max, context),
-                                   size=resolve(self.size,context))
+                                   size=size)        
+        else:
+            return self.random.uniform(resolve(self.min, context),
+                                       resolve(self.max, context))         
+
 
     def __genson_repr__(self, pretty_print=False,depth=0):
         return genson_call_str('uniform', self.min, self.max,
