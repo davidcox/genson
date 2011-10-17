@@ -153,9 +153,13 @@ class GaussianRandomGeneratorHyperopt(ParameterGenerator):
         self.size = size
 
     def __genson_eval__(self, context):
-        return np.tile([ht_dist2.normal(resolve(self.mean,context),resolve(self.stdev,context))],
-                       resolve(self.size,context))
-
+        size = resolve(self.size,context)
+        if size != 1:
+            return np.tile([ht_dist2.normal(resolve(self.mean,context),resolve(self.stdev,context))],
+                       size)
+        else:
+            return ht_dist2.normal(resolve(self.mean,context),resolve(self.stdev,context))
+                       
     def __genson_repr__(self, pretty_print=False,depth=0):
         return genson_call_str('gaussian_hyperopt', self.mean, self.stdev,
                                draws=self.draws, random_seed=self.random_seed)
