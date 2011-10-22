@@ -212,3 +212,27 @@ class ChoiceRandomGenerator(ParameterGenerator):
 
 
 registry['choice'] = ChoiceRandomGenerator
+
+
+class RandintGenerator(ParameterGenerator):
+
+    def __init__(self, min, max, draws=1, random_seed=None, size=1):
+        ParameterGenerator.__init__(self, draws, random_seed=random_seed)
+        self.min = min
+        self.max = max
+        self.size = size
+        self.vals = np.arange(min,max)
+        
+
+    def __genson_eval__(self, context):
+        if self.size == 1:
+            return self.vals[self.random.randint(len(self.vals))]
+        else:
+            return [self.vals[r] for r in self.random.randint(len(self.vals),size=self.size)]
+
+    def __genson_repr__(self, pretty_print=False,depth=0):
+        return genson_call_str('randint', *self.vals,
+                               draws=self.draws, random_seed=self.random_seed)
+
+
+registry['randint'] = RandintGenerator
