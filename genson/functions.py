@@ -143,8 +143,7 @@ class GaussianRandomGenerator(ParameterGenerator):
 registry['gaussian'] = GaussianRandomGenerator
 
 
-from hyperopt import ht_dist2
-class GaussianRandomGeneratorHyperopt(ParameterGenerator):
+class LognormalRandomGenerator(ParameterGenerator):
 
     def __init__(self, mean, stdev, draws=1, random_seed=None, size=1):
         ParameterGenerator.__init__(self, draws, random_seed=None)
@@ -153,18 +152,55 @@ class GaussianRandomGeneratorHyperopt(ParameterGenerator):
         self.size = size
 
     def __genson_eval__(self, context):
-        size = resolve(self.size,context)
+        size=resolve(self.size,context)
         if size != 1:
-            return np.tile([ht_dist2.normal(resolve(self.mean,context),resolve(self.stdev,context))],
-                       size)
+            return self.random.lognormal(resolve(self.mean, context),
+                                  resolve(self.stdev, context),
+                                  size=size)       
         else:
-            return ht_dist2.normal(resolve(self.mean,context),resolve(self.stdev,context))
-                       
+            return self.random.lognormal(resolve(self.mean, context),
+                                      resolve(self.stdev, context))
+
     def __genson_repr__(self, pretty_print=False,depth=0):
-        return genson_call_str('gaussian_hyperopt', self.mean, self.stdev,
+        return genson_call_str('lognormal', self.mean, self.stdev,
                                draws=self.draws, random_seed=self.random_seed)
                                
-registry['gaussian_hyperopt'] = GaussianRandomGeneratorHyperopt
+
+registry['lognormal'] = LognormalRandomGenerator
+
+
+class QuantizedLognormalRandomGenerator(ParameterGenerator):
+
+    def __init__(self, mean, stdev, round=1, draws=1, random_seed=None, size=1):
+        ParameterGenerator.__init__(self, draws, random_seed=None)
+        self.mean = mean
+        self.stdev = stdev
+        self.size = size
+        self.round = round
+
+    def __genson_eval__(self, context):
+        size=resolve(self.size,context)
+        if size != 1:
+            val = self.random.lognormal(resolve(self.mean, context),
+                                  resolve(self.stdev, context),
+                                  size=size)       
+        else:
+            val = self.random.lognormal(resolve(self.mean, context),
+                                      resolve(self.stdev, context))
+                                      
+        round = resolve(self.round,context)                             
+        val = (np.ceil(val) // round).astype(np.int64) * round
+        
+        return val
+        
+
+    def __genson_repr__(self, pretty_print=False,depth=0):
+        return genson_call_str('qlognormal', self.mean, self.stdev,
+                               draws=self.draws, random_seed=self.random_seed)
+                               
+
+registry['qlognormal'] = QuantizedLognormalRandomGenerator
+
 
 
 class UniformRandomGenerator(ParameterGenerator):
