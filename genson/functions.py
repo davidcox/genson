@@ -24,8 +24,8 @@ class GenSONFunction(GenSONOperand):
         return self.fun(*resolved_args, **resolved_kwargs)
 
     def __genson_repr__(self, pretty_print=False, depth=0):
-        arg_list = genson_dumps(self.args,pretty_print,0)
-        kwarg_list = ["%s=%s" % genson_dumps(x,pretty_print,depth)
+        arg_list = genson_dumps(self.args, pretty_print, 0)
+        kwarg_list = ["%s=%s" % genson_dumps(x, pretty_print, depth)
                       for x in self.kwargs.items()]
         arg_str = ",".join(arg_list + tuple(kwarg_list))
 
@@ -43,10 +43,11 @@ register_function('tan', np.tan)
 
 
 class ParameterGenerator(GenSONOperand):
+
     def __init__(self, draws=1, random_seed=None):
         self.draws = draws
         self.counter = 0
-        
+
         self.random_seed = random_seed
         self.seed()
 
@@ -56,15 +57,13 @@ class ParameterGenerator(GenSONOperand):
 
     def seed(self, new_seed=None):
         if new_seed is not None:
-            self.random_seed = seed
-            seed = new_seed
+            seed = self.random_seed = new_seed
         elif self.random_seed is None:
             seed = get_global_seed()
         else:
             seed = self.random_seed
 
         self.random = np.random.RandomState(seed=seed)
-
 
     def advance(self):
         self.counter += 1
@@ -76,7 +75,6 @@ class ParameterGenerator(GenSONOperand):
     def __genson_eval__(self, context):
         raise NotImplementedError() 
 
-            
 
 class GridGenerator(ParameterGenerator):
 
@@ -85,18 +83,18 @@ class GridGenerator(ParameterGenerator):
         random_seed = kwargs.pop('random_seed', None)
         assert_kwargs_consumed(kwargs)
 
-        ParameterGenerator.__init__(self, draws, random_seed)
+        ParameterGenerator.__init__(self, draws=draws, random_seed=random_seed)
 
         self.values = values
         if self.draws is None:
             self.draws = len(self.values)
-        
-        assert_kwargs_consumed(kwargs)    
-        
+
+        assert_kwargs_consumed(kwargs)
+
     def __genson_eval__(self, context):
         return self.values[self.counter]
 
-    def __genson_repr__(self,pretty_print=False,depth=0):
+    def __genson_repr__(self, pretty_print=False, depth=0):
 
         vals = [str(x) for x in genson_dumps(self.values)]
         val_str = ",".join(vals)
@@ -117,10 +115,11 @@ def genson_call_str(name, *args, **kwargs):
 
     return "%s(%s)" % (name, ",".join(g_args + tuple(g_kwargs)))
 
+
 class GaussianRandomGenerator(ParameterGenerator):
 
-    def __init__(self, mean, stdev, draws=1, random_seed=None, size=1):
-        ParameterGenerator.__init__(self, draws, random_seed=None)
+    def __init__(self, mean, stdev, draws=1, random_seed=random_seed, size=1):
+        ParameterGenerator.__init__(self, draws=draws, random_seed=random_seed)
         self.mean = mean
         self.stdev = stdev
         self.size = size
@@ -135,7 +134,7 @@ class GaussianRandomGenerator(ParameterGenerator):
             return self.random.normal(resolve(self.mean, context),
                                       resolve(self.stdev, context))
 
-    def __genson_repr__(self, pretty_print=False,depth=0):
+    def __genson_repr__(self, pretty_print=False, depth=0):
         return genson_call_str('gaussian', self.mean, self.stdev,
                                draws=self.draws, random_seed=self.random_seed)
                                
@@ -146,7 +145,7 @@ registry['gaussian'] = GaussianRandomGenerator
 class LognormalRandomGenerator(ParameterGenerator):
 
     def __init__(self, mean, stdev, draws=1, random_seed=None, size=1):
-        ParameterGenerator.__init__(self, draws, random_seed=None)
+        ParameterGenerator.__init__(self, draws=draws, random_seed=random_seed)
         self.mean = mean
         self.stdev = stdev
         self.size = size
@@ -172,7 +171,7 @@ registry['lognormal'] = LognormalRandomGenerator
 class QuantizedLognormalRandomGenerator(ParameterGenerator):
 
     def __init__(self, mean, stdev, round=1, draws=1, random_seed=None, size=1):
-        ParameterGenerator.__init__(self, draws, random_seed=None)
+        ParameterGenerator.__init__(self, draws=draws, random_seed=random_seed)
         self.mean = mean
         self.stdev = stdev
         self.size = size
@@ -206,7 +205,7 @@ registry['qlognormal'] = QuantizedLognormalRandomGenerator
 class UniformRandomGenerator(ParameterGenerator):
 
     def __init__(self, min, max, draws=1, random_seed=None, size=1):
-        ParameterGenerator.__init__(self, draws, random_seed=None)
+        ParameterGenerator.__init__(self, draws=draws, random_seed=random_seed)
         self.min = min
         self.max = max
         self.size = size
@@ -222,7 +221,7 @@ class UniformRandomGenerator(ParameterGenerator):
                                        resolve(self.max, context))         
 
 
-    def __genson_repr__(self, pretty_print=False,depth=0):
+    def __genson_repr__(self, pretty_print=False, depth=0):
         return genson_call_str('uniform', self.min, self.max,
                                draws=self.draws, random_seed=self.random_seed)
 
@@ -232,7 +231,7 @@ registry['uniform'] = UniformRandomGenerator
 class ChoiceRandomGenerator(ParameterGenerator):
 
     def __init__(self, vals, draws=1, random_seed=None, size=1):
-        ParameterGenerator.__init__(self, draws, random_seed=random_seed)
+        ParameterGenerator.__init__(self, draws=draws, random_seed=random_seed)
         self.vals = vals
         self.size = size
 
@@ -242,7 +241,7 @@ class ChoiceRandomGenerator(ParameterGenerator):
         else:
             return [self.vals[r] for r in self.random.randint(len(self.vals),size=self.size)]
 
-    def __genson_repr__(self, pretty_print=False,depth=0):
+    def __genson_repr__(self, pretty_print=False, depth=0):
         return genson_call_str('choice', *self.vals,
                                draws=self.draws, random_seed=self.random_seed)
 
@@ -253,7 +252,7 @@ registry['choice'] = ChoiceRandomGenerator
 class RandintGenerator(ParameterGenerator):
 
     def __init__(self, min, max, draws=1, random_seed=None, size=1):
-        ParameterGenerator.__init__(self, draws, random_seed=random_seed)
+        ParameterGenerator.__init__(self, draws=draws, random_seed=random_seed)
         self.min = min
         self.max = max
         self.size = size
