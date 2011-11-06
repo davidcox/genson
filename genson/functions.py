@@ -118,7 +118,7 @@ def genson_call_str(name, *args, **kwargs):
 
 class GaussianRandomGenerator(ParameterGenerator):
 
-    def __init__(self, mean, stdev, draws=1, random_seed=random_seed, size=1):
+    def __init__(self, mean, stdev, draws=1, random_seed=None, size=1):
         ParameterGenerator.__init__(self, draws=draws, random_seed=random_seed)
         self.mean = mean
         self.stdev = stdev
