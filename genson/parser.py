@@ -157,12 +157,15 @@ genson_value << (genson_value_tuple | genson_function | \
                 json_string | json_number | genson_dict | \
                 json_array | TRUE | FALSE | NULL )
 
-
+def F(x):
+    return -x[0][1]
+    
+    
 genson_expression = (dummy_token("value") | operatorPrecedence( genson_value,
     [
      (Literal('^'), 2, opAssoc.RIGHT,   lambda x: x[0][0] ** x[0][2]),
-     (Literal('-'), 1, opAssoc.RIGHT,    lambda x: -x[0][0]),
-     (Literal('+'), 1, opAssoc.RIGHT,    lambda x: x[0][0]),
+     (Literal('-'), 1, opAssoc.RIGHT,    lambda x : -x[0][1]),
+     (Literal('+'), 1, opAssoc.RIGHT,    lambda x: x[0][1]),
      (Literal('*'), 2, opAssoc.LEFT,     lambda x: x[0][0] * x[0][2]),
      (Literal('/'), 2, opAssoc.LEFT,     lambda x: x[0][0] / x[0][2]),
      (Literal('+'), 2, opAssoc.LEFT,     lambda x: x[0][0] + x[0][2]),
