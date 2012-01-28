@@ -3,30 +3,44 @@ import copy
 
 default_random_seed = None
 
+
 def set_global_seed(new_seed):
     global default_random_seed
     default_random_seed = new_seed
-    
+
+
 def get_global_seed():
     global default_random_seed
     return default_random_seed
 
+
 def isdict(x):
     return isinstance(x, dict)
+
+
 def istuple(x):
     return isinstance(x, tuple)
+
+
+def isindexable(x):
+    return getattr(x, '__getitem__', False)
+
+
 def isiterable(x):
     return getattr(x, '__iter__', False)
 # def isgensonref(x):
 #     return isinstance(x, ScopedReference)
+
+
 def isgensonevaluable(x):
     return getattr(x, '__genson_eval__', False)
+
 
 def isgensondumpable(x):
     return getattr(x, '__genson_repr__', False)
 
 
-def resolve(x, context = []):
+def resolve(x, context=[]):
     if isgensonevaluable(x):
         return resolve(x.__genson_eval__(context), context)
     elif isdict(x):
@@ -36,7 +50,7 @@ def resolve(x, context = []):
         # push down object context stack
         context.append(return_dict)
 
-        for k,v in x.items():
+        for k, v in x.items():
             val = resolve(v, context)
 
             # check if we need to do a splat
@@ -45,7 +59,7 @@ def resolve(x, context = []):
                     if len(k) is not len(val):
                         raise Exception("Invalid splat")
 
-                    for (splat_key,splat_val) in zip(k,val):
+                    for (splat_key, splat_val) in zip(k, val):
                         return_dict[splat_key] = resolve(splat_val, context)
                 else:
                     for splat_key in k:
@@ -73,39 +87,40 @@ def resolve(x, context = []):
 
 
 def genson_dumps(o, pretty_print=False, depth=0):
-    
+
     if isgensondumpable(o):
         return o.__genson_repr__(pretty_print, depth)
-    
+
     elif isdict(o):
-        
+
         element_strs = []
-        for k,v in o.items():
+        for k, v in o.items():
             if isiterable(k):
                 element_strs.append('(%s) : %s' % \
                                     (",".join(['"%s"' % x for x in k]),
-                                    genson_dumps(v, pretty_print, depth+1)))
+                                    genson_dumps(v, pretty_print, depth + 1)))
             else:
                 element_strs.append('"%s" : %s' % \
-                                    (k, genson_dumps(v, pretty_print, depth+1)))
-        
+                        (k, genson_dumps(v, pretty_print, depth + 1)))
+
         return_str = ''
         if pretty_print:
             tabs = '\t' * depth
             return_str += '{\n' + tabs + '\t'
             return_str += (",\n" + tabs + "\t").join(element_strs)
-            
+
             return_str += '\n' + tabs + '}'
         else:
             return_str = "{%s}" % ",".join(element_strs)
         return return_str
-        
+
     elif istuple(o):
-        return tuple([genson_dumps(x,pretty_print,depth) for x in o])
+        return tuple([genson_dumps(x, pretty_print, depth) for x in o])
     elif isiterable(o):
-        return [genson_dumps(x,pretty_print,depth) for x in o]
+        return [genson_dumps(x, pretty_print, depth) for x in o]
     else:
         return str(o)
+
 
 def kwargs_consumed(f):
     def wrapper(self, *args, **kwargs):
@@ -113,7 +128,8 @@ def kwargs_consumed(f):
         assert_kwargs_consumed(kwargs)
     return wrapper
 
+
 def assert_kwargs_consumed(kwargs):
     if len(kwargs) > 0:
-        raise ValueError(('Unknown keyword arguments: %s' % 
+        raise ValueError(('Unknown keyword arguments: %s' %
                           ', '.join(kwargs.keys())))
