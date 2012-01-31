@@ -73,7 +73,7 @@ class ParameterGenerator(GenSONOperand):
         return True
 
     def __genson_eval__(self, context):
-        raise NotImplementedError() 
+        raise NotImplementedError()
 
 
 class GridGenerator(ParameterGenerator):
@@ -125,11 +125,11 @@ class GaussianRandomGenerator(ParameterGenerator):
         self.size = size
 
     def __genson_eval__(self, context):
-        size=resolve(self.size,context)
+        size = resolve(self.size, context)
         if size != 1:
             return self.random.normal(resolve(self.mean, context),
                                   resolve(self.stdev, context),
-                                  size=size)       
+                                  size=size)
         else:
             return self.random.normal(resolve(self.mean, context),
                                       resolve(self.stdev, context))
@@ -137,7 +137,7 @@ class GaussianRandomGenerator(ParameterGenerator):
     def __genson_repr__(self, pretty_print=False, depth=0):
         return genson_call_str('gaussian', self.mean, self.stdev,
                                draws=self.draws, random_seed=self.random_seed)
-                               
+
 
 registry['gaussian'] = GaussianRandomGenerator
 
@@ -151,26 +151,27 @@ class LognormalRandomGenerator(ParameterGenerator):
         self.size = size
 
     def __genson_eval__(self, context):
-        size=resolve(self.size,context)
+        size = resolve(self.size, context)
         if size != 1:
             return self.random.lognormal(resolve(self.mean, context),
-                                  resolve(self.stdev, context),
-                                  size=size)       
+                                         resolve(self.stdev, context),
+                                         size=size)
         else:
             return self.random.lognormal(resolve(self.mean, context),
-                                      resolve(self.stdev, context))
+                                         resolve(self.stdev, context))
 
-    def __genson_repr__(self, pretty_print=False,depth=0):
+    def __genson_repr__(self, pretty_print=False, depth=0):
         return genson_call_str('lognormal', self.mean, self.stdev,
                                draws=self.draws, random_seed=self.random_seed)
-                               
+
 
 registry['lognormal'] = LognormalRandomGenerator
 
 
 class QuantizedLognormalRandomGenerator(ParameterGenerator):
 
-    def __init__(self, mean, stdev, round=1, draws=1, random_seed=None, size=1):
+    def __init__(self, mean, stdev, round=1, draws=1, random_seed=None,
+                 size=1):
         ParameterGenerator.__init__(self, draws=draws, random_seed=random_seed)
         self.mean = mean
         self.stdev = stdev
@@ -178,28 +179,27 @@ class QuantizedLognormalRandomGenerator(ParameterGenerator):
         self.round = round
 
     def __genson_eval__(self, context):
-        size=resolve(self.size,context)
+        size = resolve(self.size, context)
         if size != 1:
             val = self.random.lognormal(resolve(self.mean, context),
-                                  resolve(self.stdev, context),
-                                  size=size)       
+                                        resolve(self.stdev, context),
+                                        size=size)
         else:
             val = self.random.lognormal(resolve(self.mean, context),
-                                      resolve(self.stdev, context))
-                                      
-        round = resolve(self.round,context)                             
-        val = (np.ceil(val) // round).astype(np.int64) * round
-        
-        return val
-        
+                                        resolve(self.stdev, context))
 
-    def __genson_repr__(self, pretty_print=False,depth=0):
+        round = resolve(self.round, context)
+        val = (np.ceil(val) // round).astype(np.int64) * round
+
+        return val
+
+    def __genson_repr__(self, pretty_print=False, depth=0):
         return genson_call_str('qlognormal', self.mean, self.stdev,
-                               draws=self.draws, random_seed=self.random_seed)
-                               
+                               draws=self.draws,
+                               random_seed=self.random_seed)
+
 
 registry['qlognormal'] = QuantizedLognormalRandomGenerator
-
 
 
 class UniformRandomGenerator(ParameterGenerator):
@@ -211,15 +211,14 @@ class UniformRandomGenerator(ParameterGenerator):
         self.size = size
 
     def __genson_eval__(self, context):
-        size=resolve(self.size,context)
+        size = resolve(self.size, context)
         if size != 1:
             return self.random.uniform(resolve(self.min, context),
                                    resolve(self.max, context),
-                                   size=size)        
+                                   size=size)
         else:
             return self.random.uniform(resolve(self.min, context),
-                                       resolve(self.max, context))         
-
+                                       resolve(self.max, context))
 
     def __genson_repr__(self, pretty_print=False, depth=0):
         return genson_call_str('uniform', self.min, self.max,
@@ -239,7 +238,8 @@ class ChoiceRandomGenerator(ParameterGenerator):
         if self.size == 1:
             return self.vals[self.random.randint(len(self.vals))]
         else:
-            return [self.vals[r] for r in self.random.randint(len(self.vals),size=self.size)]
+            return [self.vals[r] for r in
+                    self.random.randint(len(self.vals), size=self.size)]
 
     def __genson_repr__(self, pretty_print=False, depth=0):
         return genson_call_str('choice', *self.vals,
@@ -256,16 +256,16 @@ class RandintGenerator(ParameterGenerator):
         self.min = min
         self.max = max
         self.size = size
-        self.vals = np.arange(min,max)
-        
+        self.vals = np.arange(min, max)
 
     def __genson_eval__(self, context):
         if self.size == 1:
             return self.vals[self.random.randint(len(self.vals))]
         else:
-            return [self.vals[r] for r in self.random.randint(len(self.vals),size=self.size)]
+            return [self.vals[r] for r in
+                    self.random.randint(len(self.vals), size=self.size)]
 
-    def __genson_repr__(self, pretty_print=False,depth=0):
+    def __genson_repr__(self, pretty_print=False, depth=0):
         return genson_call_str('randint', *self.vals,
                                draws=self.draws, random_seed=self.random_seed)
 
