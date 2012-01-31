@@ -1,4 +1,4 @@
 pyparsing>=1.5.5
-numpy>=1.6.0
+numpy>=1.5
 nose>=1.0
 

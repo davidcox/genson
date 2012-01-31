@@ -50,6 +50,20 @@ def test_main():
         }
     """
 
+    testdata3 = """
+        {
+            "test0": [2,3],
+            "test1": [-8, this.test0.0, 4],
+            "test2":[this.test1.1]
+        }
+    """
+
+    testdata4 = """
+        {
+            "test0": [2,-3, -0.4]
+        }
+    """
+
     test_broken1 = """
         {
             // no key
@@ -73,6 +87,16 @@ def test_main():
             "test1" : 5
         }
     """
+
+    tic = time.time()
+    genson.loads(testdata4)
+    toc = time.time() - tic
+    print("Negative unary parse time: %s" % toc)
+
+    tic = time.time()
+    genson.loads(testdata3)
+    toc = time.time() - tic
+    print("List placement example parse time: %s" % toc)
 
     tic = time.time()
     genson.loads(testdata2)
