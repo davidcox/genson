@@ -133,11 +133,14 @@ genson_ref =  genson_initial_scope + \
 genson_ref.setParseAction(lambda x: ScopedReference(x.asList()))
 
 
+genson_expression = Forward()
+genson_elements = delimitedList( genson_expression )
+
 genson_kwargs = Group(delimitedList( Word(alphas + '_') + Suppress("=") + \
-                              genson_value ))
+                              genson_expression ))
 genson_function =  Word(alphas + '_')("name") + \
                     Suppress('(') + \
-                    Optional(json_elements)("args") + \
+                    Optional(genson_elements)("args") + \
                     Optional(Suppress(',')) +\
                     Optional(genson_kwargs)("kwargs") + \
                     Suppress(')')
@@ -161,7 +164,7 @@ def F(x):
     return -x[0][1]
     
     
-genson_expression = (dummy_token("value") | operatorPrecedence( genson_value,
+genson_expression << (dummy_token("value") | operatorPrecedence( genson_value,
     [
      (Literal('^'), 2, opAssoc.RIGHT,   lambda x: x[0][0] ** x[0][2]),
      (Literal('-'), 1, opAssoc.RIGHT,    lambda x : -x[0][1]),
