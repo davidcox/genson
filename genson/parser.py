@@ -70,6 +70,8 @@ except ImportError:
                           "'pip install -vUI ordereddict'")
 
 # a simple helper functions
+
+
 def make_genson_function(name, gen_args=[], gen_kwargs={}):
 
     generator_class = functions.registry.get(name, None)
@@ -88,6 +90,7 @@ def make_genson_function(name, gen_args=[], gen_kwargs={}):
 
     return g
 
+
 def dummy_token(name):
     """  A allows for more sensible error reporting
     """
@@ -96,25 +99,25 @@ def dummy_token(name):
     return exception_token
 
 
-TRUE = Keyword("true").setParseAction( replaceWith(True) )
-FALSE = Keyword("false").setParseAction( replaceWith(False) )
-NULL = Keyword("null").setParseAction( replaceWith(None) )
+TRUE = Keyword("true").setParseAction(replaceWith(True))
+FALSE = Keyword("false").setParseAction(replaceWith(False))
+NULL = Keyword("null").setParseAction(replaceWith(None))
 
-json_string = dblQuotedString.setParseAction( removeQuotes )
-json_number = Combine( Optional('-') + ( '0' | Word('123456789',nums) ) +
-                    Optional( '.' + Word(nums) ) +
-                    Optional( Word('eE',exact=1) + Word(nums+'+-',nums) ) )
+json_string = dblQuotedString.setParseAction(removeQuotes)
+json_number = Combine(Optional('-') + ('0' | Word('123456789', nums)) +
+                    Optional('.' + Word(nums)) +
+                    Optional(Word('eE', exact=1) + Word(nums + '+-', nums)))
 
 genson_key_tuple = Forward()
-genson_key = (dummy_token("key") | json_string | genson_key_tuple )
-genson_key_tuple << Suppress('(') + delimitedList( genson_key ) + \
+genson_key = (dummy_token("key") | json_string | genson_key_tuple)
+genson_key_tuple << Suppress('(') + delimitedList(genson_key) + \
                          Suppress(')')
 genson_key_tuple.setParseAction(lambda x: tuple(x))
 
 genson_dict = Forward()
 genson_value = Forward()
-json_elements = delimitedList( genson_value )
-json_array = Group(Suppress('[') + Optional(json_elements) + Suppress(']') )
+json_elements = delimitedList(genson_value)
+json_array = Group(Suppress('[') + Optional(json_elements) + Suppress(']'))
 
 genson_value_tuple = Suppress('(') + json_elements + Suppress(')')
 genson_value_tuple.setParseAction(lambda x: tuple(x))
@@ -124,9 +127,9 @@ PARENT = Keyword("parent")
 ROOT = Keyword("root")
 genson_initial_scope = (THIS | PARENT | ROOT)
 genson_unquoted_key = Word(alphanums + '_')
-genson_running_scope = ( PARENT | genson_unquoted_key )
+genson_running_scope = (PARENT | genson_unquoted_key)
 
-genson_ref =  genson_initial_scope + \
+genson_ref = genson_initial_scope + \
                    Suppress('.') + \
                    delimitedList(genson_running_scope, '.')
 
@@ -134,11 +137,11 @@ genson_ref.setParseAction(lambda x: ScopedReference(x.asList()))
 
 
 genson_expression = Forward()
-genson_elements = delimitedList( genson_expression )
+genson_elements = delimitedList(genson_expression)
 
-genson_kwargs = Group(delimitedList( Word(alphas + '_') + Suppress("=") + \
-                              genson_expression ))
-genson_function =  Word(alphas + '_')("name") + \
+genson_kwargs = Group(delimitedList(Word(alphas + '_') + Suppress("=") + \
+                              genson_expression))
+genson_function = Word(alphas + '_')("name") + \
                     Suppress('(') + \
                     Optional(genson_elements)("args") + \
                     Optional(Suppress(',')) +\
@@ -158,33 +161,35 @@ genson_value << (genson_value_tuple | genson_function | \
                 genson_grid_shorthand | \
                 genson_ref | \
                 json_string | json_number | genson_dict | \
-                json_array | TRUE | FALSE | NULL )
+                json_array | TRUE | FALSE | NULL)
+
 
 def F(x):
     return -x[0][1]
-    
-    
-genson_expression << (dummy_token("value") | operatorPrecedence( genson_value,
+
+
+genson_expression << (dummy_token("value") | operatorPrecedence(genson_value,
     [
      (Literal('^'), 2, opAssoc.RIGHT,   lambda x: x[0][0] ** x[0][2]),
-     (Literal('-'), 1, opAssoc.RIGHT,    lambda x : -x[0][1]),
+     (Literal('-'), 1, opAssoc.RIGHT,    lambda x: -x[0][1]),
      (Literal('+'), 1, opAssoc.RIGHT,    lambda x: x[0][1]),
      (Literal('*'), 2, opAssoc.LEFT,     lambda x: x[0][0] * x[0][2]),
      (Literal('/'), 2, opAssoc.LEFT,     lambda x: x[0][0] / x[0][2]),
      (Literal('+'), 2, opAssoc.LEFT,     lambda x: x[0][0] + x[0][2]),
      (Literal('-'), 2, opAssoc.LEFT,     lambda x: x[0][0] - x[0][2]),
      ]
-    ) )
+))
 
-member_def = Group( genson_key + Suppress(':') + genson_expression )
-json_members = delimitedList( member_def )
+member_def = Group(genson_key + Suppress(':') + genson_expression)
+json_members = delimitedList(member_def)
 empty_doc = Suppress('{') + Suppress('}')
-genson_dict << (Dict( Suppress('{') + json_members + Suppress('}') | empty_doc))
+genson_dict << (Dict(Suppress('{') + json_members + Suppress('}') | empty_doc))
 
 genson_object = (genson_dict | json_array | genson_value_tuple)
 
 json_comment = cppStyleComment
-genson_object.ignore( json_comment )
+genson_object.ignore(json_comment)
+
 
 def clean_dict(x):
     x_list = x.asList()
@@ -192,14 +197,16 @@ def clean_dict(x):
 
 genson_dict.setParseAction(clean_dict)
 
-def convert_numbers(s,l,toks):
+
+def convert_numbers(s, l, toks):
     n = toks[0]
     try:
         return int(n)
     except ValueError, ve:
         return float(n)
 
-json_number.setParseAction( convert_numbers )
+json_number.setParseAction(convert_numbers)
+
 
 class GENSONParser:
     def __init__(self):
@@ -209,4 +216,3 @@ class GENSONParser:
     def parse_string(self, genson_string):
         result = self.grammar.parseString(genson_string)
         return result.asList()[0]
-
