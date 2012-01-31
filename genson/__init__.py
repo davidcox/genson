@@ -55,6 +55,13 @@ class JSONGenerator:
         for g in self.generators:
             g.reset()
 
+    # dictionary support
+    def __getitem__(self, key):
+        return self.genson_dict[key]
+    
+    def keys(self):
+        return self.genson_dict.keys()
+
 
 def load(io):
     s = "\n".join(io.readlines())
