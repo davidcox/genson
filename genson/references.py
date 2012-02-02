@@ -9,11 +9,9 @@ def resolve_scoped_reference(ref, context):
         the reference and return the value
     """
 
-    print ref, context
-
     if len(context) == 0:
         # TODO: better
-        raise Exception("Invalid reference")
+        raise Exception("Invalid reference", ref)
 
     # pop an element off of the scope list
     element_to_resolve = ref.pop(0)
