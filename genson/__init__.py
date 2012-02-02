@@ -1,4 +1,8 @@
 from parser import *
+from internal_ops import lazy
+from internal_ops import register_lazy
+from internal_ops import register_function
+from references import ref
 from functions import *
 from util import *
 import copy
@@ -58,7 +62,7 @@ class JSONGenerator:
     # dictionary support
     def __getitem__(self, key):
         return self.genson_dict[key]
-    
+
     def keys(self):
         return self.genson_dict.keys()
 
@@ -79,5 +83,46 @@ def dumps(generator, pretty_print=False):
         return genson_dumps(generator, pretty_print)
     else:
         return genson_dumps(generator.genson_dict, pretty_print)
-        
-        
+
+
+class JSONFunction(object):
+    """Make a GenSON document into a callable function
+    """
+    # TODO: make the treatment of args and kwargs in the document
+    #       more Python-like. The current implementation requires that
+    #       parameters (and hence arguments as well) be divided between
+    #       positional and keyword, which python does not require.
+
+    def __init__(self, prog):
+        self.prog = prog
+
+    def __call__(self, *args, **kwargs):
+        prog = copy.deepcopy(self.prog)
+        cleanup = []
+        if args:
+            if prog['args'] == 'from_calldoc':
+                prog['args'] = args
+                cleanup.append('args')
+            else:
+                raise ValueError(
+                    "to accept args, must have prog['args'] == 'calldoc'")
+        if kwargs:
+            if prog['kwargs'] == 'from_calldoc':
+                prog['kwargs'] = kwargs
+                cleanup.append('kwargs')
+            else:
+                raise ValueError(
+                    "to accept kwargs, must have prog['kwargs'] == 'calldoc'")
+
+        # TODO: execute more directly, don't go through generator
+        rval_iter = iter(JSONGenerator(prog))
+        ii = 0
+        # TODO: use itertools enumerate
+        for rval in rval_iter:
+            ii += 1
+            if ii == 2:
+                raise ValueError('genson_call is inappropriate for grid programs')
+        for key in cleanup:
+            del rval[key]
+        return rval
+

@@ -1,5 +1,6 @@
 from util import resolve, genson_dumps
 
+
 class GenSONBinaryOp:
     def __init__(self,a,b,op):
         self.a = a
@@ -21,11 +22,12 @@ class GenSONBinaryOp:
             return res_a / res_b
         elif self.op is '**':
             return res_a / res_b
-    
+
     def __genson_repr__(self, pretty_print=False, depth=0):
-        return "%s %s %s" % (genson_dumps(self.a), 
-                             self.op, 
+        return "%s %s %s" % (genson_dumps(self.a),
+                             self.op,
                              genson_dumps(self.b))
+
 
 class GenSONUnaryOp:
     def __init__(self, a, op):
@@ -39,9 +41,10 @@ class GenSONUnaryOp:
             return res_a
         if self.op is '-':
             return -res_a
-    
+
     def __genson_repr__(self, pretty_print=False, depth=0):
         return "%s %s" % (self.op, genson_dumps(self.a))
+
 
 class GenSONOperand:
     def __add__(self, other):
@@ -68,6 +71,13 @@ class GenSONOperand:
         return GenSONUnaryOp(self, '-')
     def __pos__(self, other):
         return GenSONUnaryOp(self, '+')
+    def __getitem__(self, idx):
+        return GenSONFunction(
+                lambda thing, idx: thing[idx],
+                'getitem',
+                (self, idx),
+                {})
+
 
 # Expedient trickiness
 def quicky_populate(cls, method_list):
@@ -84,3 +94,74 @@ op_list = [  '__add__', '__radd__',
 
 quicky_populate(GenSONBinaryOp, op_list)
 quicky_populate(GenSONUnaryOp, op_list)
+
+registry = {}
+
+class GenSONFunction(GenSONOperand):
+    def __init__(self, fun, name, args, kwargs):
+        self.name = name
+        self.fun = fun
+        self.args = args
+        self.kwargs = kwargs
+
+    def __genson_eval__(self, context):
+        resolved_args = []
+        for a in self.args:
+            resolved_args.append(resolve(a, context))
+
+        resolved_kwargs = {}
+        for k, v in self.kwargs.items():
+            resolved_kwargs[k] = resolve(v, context)
+
+        return self.fun(*resolved_args, **resolved_kwargs)
+
+    def __genson_repr__(self, pretty_print=False, depth=0):
+        arg_list = genson_dumps(self.args, pretty_print, 0)
+        kwarg_list = ["%s=%s" % genson_dumps(x, pretty_print, depth)
+                      for x in self.kwargs.items()]
+        arg_str = ",".join(arg_list + tuple(kwarg_list))
+
+        return "%s(%s)" % (self.name, arg_str)
+
+
+def register_function(name, fun):
+    def wrapper(*args, **kwargs):
+        return GenSONFunction(fun, name, args, kwargs)
+    registry[name] = wrapper
+
+
+class LazyCall(object):
+    """
+    Class for decorating functions and making them GenSON-compatible.
+
+    Usage:
+
+    >>> @register_lazy
+    >>> def f(a, b=True):
+    >>>     return a if b else None
+    >>> f(1)              # returns 1
+    >>> f(1, False)       # returns None
+    >>> f.lazy(1, False)  # saves args, kwargs, returns a GenSONFunction
+
+
+    """
+    def __init__(self, fn, registry_name=None):
+        self.fn = fn
+        if registry_name:
+            registry[registry_name] = self.lazy
+
+    def __call__(self, *args, **kwargs):
+        return self.fn(*args, **kwargs)
+
+    def lazy(self, *args, **kwargs):
+        return GenSONFunction(
+                self.fn,
+                self.fn.__name__,
+                args,
+                kwargs)
+
+def lazy(f):
+    return LazyCall(f)
+
+def register_lazy(f):
+    return LazyCall(f, registry_name=f.__name__)
