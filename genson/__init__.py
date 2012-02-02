@@ -1,10 +1,11 @@
 from parser import *
-from internal_ops import lazy
-from internal_ops import register_lazy
-from internal_ops import register_function
-from internal_ops import LazyCall
 from internal_ops import GenSONFunction
 from internal_ops import GenSONOperand
+from internal_ops import lazy
+from internal_ops import LazyCall
+from internal_ops import literal
+from internal_ops import register_lazy
+from internal_ops import register_function
 from references import ref
 from functions import *
 from util import *
@@ -93,12 +94,15 @@ def dumps(generator, pretty_print=False):
 
 
 def node_eval(obj, memo):
+
+    # -- dictionary containers
     if isinstance(obj, (dict, OrderedDict)):
         # XXX: this will evaluate in undefined order for dicts
         waiting_on = [v for v in obj.values() if id(v) not in memo]
         if not waiting_on:
             memo[id(obj)] = dict([(k, memo[id(v)]) for k, v in obj.items()])
 
+    # -- callable nodes
     elif isinstance(obj, GenSONFunction):
         # XXX: this will evaluate in undefined order for kwargs
         inputs = list(obj.args) + obj.kwargs.values()
@@ -108,14 +112,23 @@ def node_eval(obj, memo):
             kwargs = dict([(k, memo[id(v)]) for k, v in obj.kwargs.items()])
             memo[id(obj)] = obj.fun(*args, **kwargs)
 
+    # -- iterable containers
     elif isinstance(obj, (list, tuple)):
         waiting_on = [v for v in obj if id(v) not in memo]
         if not waiting_on:
             memo[id(obj)] = type(obj)([memo[id(v)] for v in obj])
 
+    # -- types that pass-through
     elif isinstance(obj, (int, float, str)):
         waiting_on = []
         memo[id(obj)] = obj
+
+    # -- literals that pass-through
+    elif obj in (None,):
+        waiting_on = []
+        memo[id(obj)] = obj
+
+    # -- anything else
     else:
         raise NotImplementedError(obj)
 
@@ -125,6 +138,8 @@ def node_eval(obj, memo):
         return waiting_on
 
 
+STACK_LIMIT = 10000
+
 def rec_eval(todo, memo):
     """
     Returns nodes required by this one.
@@ -132,6 +147,8 @@ def rec_eval(todo, memo):
     computed and the value is available as memo[id(node)]
     """
     while todo:
+        if len(todo) > STACK_LIMIT:
+            raise RuntimeError('Probably infinite loop in document')
         node = todo.pop()
         if id(node) not in memo:
             todo.extend(node_eval(node, memo))
@@ -157,8 +174,8 @@ class JSONFunction(object):
     def __call__(self, *args, **kwargs):
         prog, ARGS, KWARGS = copy.deepcopy(
                 (self.prog, self._ARGS, self._KWARGS))
-        ARGS[:] = args
-        KWARGS.update(kwargs)
+        ARGS[:] = [literal(a) for a in args]
+        KWARGS.update(dict([(k, literal(v)) for k, v in kwargs.items()]))
 
         memo = {}
         rec_eval([prog], memo)

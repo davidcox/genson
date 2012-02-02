@@ -185,3 +185,6 @@ def register_lazy(f):
 @lazy
 def identity(obj):
     return obj
+
+def literal(obj):
+    return LazyCall(lambda : obj, registry_name=None).lazy()
