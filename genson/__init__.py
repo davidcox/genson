@@ -1,4 +1,4 @@
-from parser import *
+from parser import GENSONParser
 from functions import *
 from util import *
 

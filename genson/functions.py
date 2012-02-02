@@ -37,9 +37,16 @@ def register_function(name, fun):
         return GenSONFunction(fun, name, args, kwargs)
     registry[name] = wrapper
 
+    return wrapper
+
 register_function('sin', np.sin)
 register_function('cos', np.cos)
 register_function('tan', np.tan)
+
+
+# a simple decorator for making genson functions on the fly
+def genson_function(fun):
+    return register_function(fun.__name__, fun)
 
 
 class ParameterGenerator(GenSONOperand):
