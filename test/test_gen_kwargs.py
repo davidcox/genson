@@ -1,5 +1,6 @@
 import genson
 
+
 def test_multi_gen_kwargs():
     gson = \
     """
@@ -18,4 +19,3 @@ def test_gen_kwargs_with_underscore():
     }
     """
     genson.loads(gson)
-

@@ -1,5 +1,6 @@
 import genson
 
+
 def test_dumps():
     gson = """
           {
@@ -23,15 +24,14 @@ def test_dumps():
               "testZ": 10
           }
           """
-    
+
     gen = genson.loads(gson)
-    
+
     print genson.dumps(gen)
     print genson.dumps(gen, pretty_print=True)
-    
+
     # TODO: obviously, more needed here
 
 if __name__ == "__main__":
-    
-    test_dumps()
 
+    test_dumps()
