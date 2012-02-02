@@ -202,7 +202,7 @@ def convert_numbers(s, l, toks):
     n = toks[0]
     try:
         return int(n)
-    except ValueError, ve:
+    except ValueError:
         return float(n)
 
 json_number.setParseAction(convert_numbers)

@@ -1,7 +1,6 @@
 from parser import *
 from functions import *
 from util import *
-import copy
 
 
 class JSONGenerator:
@@ -58,7 +57,7 @@ class JSONGenerator:
     # dictionary support
     def __getitem__(self, key):
         return self.genson_dict[key]
-    
+
     def keys(self):
         return self.genson_dict.keys()
 
@@ -79,5 +78,3 @@ def dumps(generator, pretty_print=False):
         return genson_dumps(generator, pretty_print)
     else:
         return genson_dumps(generator.genson_dict, pretty_print)
-        
-        

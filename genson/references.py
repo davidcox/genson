@@ -1,5 +1,5 @@
 from internal_ops import GenSONOperand
-from util import resolve, isdict, isindexable, genson_dumps
+from util import isdict, isindexable
 import copy
 
 

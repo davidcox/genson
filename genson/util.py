@@ -1,5 +1,4 @@
 # import references
-import copy
 
 default_random_seed = None
 
