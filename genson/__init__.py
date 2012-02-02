@@ -2,6 +2,9 @@ from parser import *
 from internal_ops import lazy
 from internal_ops import register_lazy
 from internal_ops import register_function
+from internal_ops import LazyCall
+from internal_ops import GenSONFunction
+from internal_ops import GenSONOperand
 from references import ref
 from functions import *
 from util import *
