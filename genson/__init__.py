@@ -25,6 +25,8 @@ class JSONGenerator:
             vals = d.values()
         elif isiterable(d):
             vals = d
+        else:
+            raise TypeError('invalid generator document', d)
 
         for v in vals:
             if isinstance(v, ParameterGenerator):
