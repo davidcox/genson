@@ -88,6 +88,9 @@ def dumps(generator, pretty_print=False):
         return genson_dumps(generator.genson_dict, pretty_print)
 
 
+FROM_KWARGS = 'from_kwargs'
+FROM_ARGS = 'from_args'
+
 class JSONFunction(object):
     """Make a GenSON document into a callable function
     """
@@ -103,14 +106,14 @@ class JSONFunction(object):
         prog = copy.deepcopy(self.prog)
         cleanup = []
         if args:
-            if prog['args'] == 'from_calldoc':
+            if prog['args'] == FROM_ARGS:
                 prog['args'] = args
                 cleanup.append('args')
             else:
                 raise ValueError(
                     "to accept args, must have prog['args'] == 'calldoc'")
         if kwargs:
-            if prog['kwargs'] == 'from_calldoc':
+            if prog['kwargs'] == FROM_KWARGS:
                 prog['kwargs'] = kwargs
                 cleanup.append('kwargs')
             else:

@@ -2,6 +2,8 @@ from collections import OrderedDict
 from genson import lazy
 from genson import JSONFunction
 from genson import ref
+from genson import FROM_KWARGS
+from genson import FROM_ARGS
 
 
 @lazy
@@ -18,8 +20,8 @@ def test_lazy_getitem_calldoc_args_kwargs():
     # -- construct a program document directly
     #    without passing through the parser
     prog = OrderedDict()
-    prog['args'] = 'from_calldoc'
-    prog['kwargs'] = 'from_calldoc'
+    prog['args'] = FROM_ARGS
+    prog['kwargs'] = FROM_KWARGS
     prog['test0'] = 4
     prog['test1'] = foo.lazy(1)
     prog['test2'] = ref('test1')[0]
