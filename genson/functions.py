@@ -80,11 +80,11 @@ def genson_call_str(name, *args, **kwargs):
     """Return string representation of a GenSON function call
     """
 
-    g_args = genson_dumps(args)
-    g_kwargs = ["%s=%s" % genson_dumps(x)
-                for x in kwargs.items() if x[1] is not None]
+    g_args = [genson_dumps(a) for a in args]
+    g_kwargs = ["%s=%s" % (genson_dumps(k), genson_dumps(v))
+                for k, v in kwargs.items() if v is not None]
 
-    return "%s(%s)" % (name, ",".join(g_args + tuple(g_kwargs)))
+    return "%s(%s)" % (name, ",".join(g_args + g_kwargs))
 
 
 class GaussianRandomGenerator(ParameterGenerator):

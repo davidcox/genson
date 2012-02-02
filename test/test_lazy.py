@@ -2,8 +2,7 @@ from collections import OrderedDict
 from genson import lazy
 from genson import JSONFunction
 from genson import ref
-from genson import FROM_KWARGS
-from genson import FROM_ARGS
+import genson
 
 
 @lazy
@@ -16,29 +15,41 @@ def test_lazy_callable():
     assert foo(1, b=3) == ('first_arg', 'second_arg', 1, 3)
     assert foo(b=3, a=1) == ('first_arg', 'second_arg', 1, 3)
 
-def test_lazy_getitem_calldoc_args_kwargs():
+def test_lazy_getitem_args_kwargs():
     # -- construct a program document directly
     #    without passing through the parser
     prog = OrderedDict()
-    prog['args'] = FROM_ARGS
-    prog['kwargs'] = FROM_KWARGS
     prog['test0'] = 4
     prog['test1'] = foo.lazy(1)
-    prog['test2'] = ref('test1')[0]
-    prog['test3'] = ref('test1')[1]
-    prog['test4'] = ref('args')[0]
-    prog['test5'] = ref('kwargs')['aaa']
+    prog['test4'] = JSONFunction.ARGS[0]
+    prog['test5'] = JSONFunction.KWARGS['aaa']
 
     wanted = dict(
             test0=4,
             test1=('first_arg', 'second_arg', 1, None),
-            test2='first_arg',
-            test3='second_arg',
             test4=33,
             test5='hello')
 
-    print prog
+    print genson.dumps(prog, pretty_print=True)
+
     f = JSONFunction(prog)
     result = dict(f(33, aaa='hello'))
-    print result
     assert result == wanted
+
+
+def test_ref():
+    # XXX This fails because ref's aren't yet implemented with JSONFunction
+    # and rec_eval
+    prog = OrderedDict()
+    prog['a'] = 5
+    prog['result'] = foo.lazy(ref('a'))
+    f = JSONFunction(prog)
+    assert f()['result'] == 5
+
+
+def test_ref_within_lazy_function_root():
+    prog = OrderedDict()
+    prog['a'] = 5
+    prog['result'] = foo.lazy(ref('root.a'))
+    f = JSONFunction(prog)
+    assert f()['result'] == 5

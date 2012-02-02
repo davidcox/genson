@@ -114,10 +114,9 @@ def genson_dumps(o, pretty_print=False, depth=0):
             return_str = "{%s}" % ",".join(element_strs)
         return return_str
 
-    elif istuple(o):
-        return tuple([genson_dumps(x, pretty_print, depth) for x in o])
     elif isiterable(o):
-        return [genson_dumps(x, pretty_print, depth) for x in o]
+        return '(%s)' % (
+                ', '.join([genson_dumps(x, pretty_print, depth) for x in o]))
     else:
         return str(o)
 

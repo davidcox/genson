@@ -116,12 +116,28 @@ class GenSONFunction(GenSONOperand):
         return self.fun(*resolved_args, **resolved_kwargs)
 
     def __genson_repr__(self, pretty_print=False, depth=0):
-        arg_list = genson_dumps(self.args, pretty_print, 0)
-        kwarg_list = ["%s=%s" % genson_dumps(x, pretty_print, depth)
-                      for x in self.kwargs.items()]
-        arg_str = ",".join(arg_list + tuple(kwarg_list))
-
-        return "%s(%s)" % (self.name, arg_str)
+        """
+            name(
+                    arg1,
+                    arg2,
+                kw1=
+                    arg3,
+                kw2=
+                    arg4
+            )
+        """
+        lines = [self.name + '(']
+        for a in self.args:
+            lines.append('%s%s,' % (
+                '\t' * (depth + 2),
+                genson_dumps(a, pretty_print, depth + 2)))
+        for k, v in self.kwargs.iteritems():
+            lines.append('\t' * (depth + 1) + k + '=')
+            lines.append('%s%s,' % (
+                '\t' * (depth + 2),
+                genson_dumps(v, pretty_print, depth + 2)))
+        lines.append('\t' * depth + ')')
+        return '\n'.join(lines)
 
 
 def register_function(name, fun):
@@ -165,3 +181,7 @@ def lazy(f):
 
 def register_lazy(f):
     return LazyCall(f, registry_name=f.__name__)
+
+@lazy
+def identity(obj):
+    return obj
