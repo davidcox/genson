@@ -38,11 +38,13 @@ def test_gaussian_uniform_seed():
 def setup_global_seed():
     genson.set_global_seed(None)
 
+
 def teardown_global_seed():
     genson.set_global_seed(None)
 
+
 @with_setup(setup_global_seed, teardown_global_seed)
-def test_gaussian_random_seed():
+def test_gaussian_random_seed2():
 
     genson.set_global_seed(42)
 
