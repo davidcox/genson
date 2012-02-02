@@ -2,6 +2,7 @@ from parser import *
 from internal_ops import GenSONFunction
 from internal_ops import GenSONOperand
 from internal_ops import lazy
+from internal_ops import lazyinfo
 from internal_ops import LazyCall
 from internal_ops import literal
 from internal_ops import register_lazy
@@ -119,7 +120,7 @@ def node_eval(obj, memo):
             memo[id(obj)] = type(obj)([memo[id(v)] for v in obj])
 
     # -- types that pass-through
-    elif isinstance(obj, (int, float, str)):
+    elif isinstance(obj, (int, float, str, np.ndarray)):
         waiting_on = []
         memo[id(obj)] = obj
 

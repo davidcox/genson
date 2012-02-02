@@ -46,7 +46,7 @@ class GenSONUnaryOp:
         return "%s %s" % (self.op, genson_dumps(self.a))
 
 
-class GenSONOperand:
+class GenSONOperand(object):
     def __add__(self, other):
         return GenSONBinaryOp(self, other, '+')
     def __radd__(self, other):
@@ -72,11 +72,28 @@ class GenSONOperand:
     def __pos__(self, other):
         return GenSONUnaryOp(self, '+')
     def __getitem__(self, idx):
+        # XXX: add unit test of argument unpacking
+        try:
+            ll = len(self)
+        except:
+            ll = None
+        if isinstance(idx, int):
+            if ll is not None and idx >= ll:
+                #  -- this IndexError is essential for supporting
+                #     tuple-unpacking syntax or list coersion of self.
+                raise IndexError(idx)
         return GenSONFunction(
                 lambda thing, idx: thing[idx],
                 'getitem',
                 (self, idx),
                 {})
+    def set_info(self, info):
+        self._info = info
+    def __len__(self):
+        try:
+            return self._info['len']
+        except (AttributeError, KeyError):
+            return object.__len__(self)
 
 
 # Expedient trickiness
@@ -161,6 +178,7 @@ class LazyCall(object):
 
 
     """
+    info = None
     def __init__(self, fn, registry_name=None):
         self.fn = fn
         if registry_name:
@@ -170,17 +188,27 @@ class LazyCall(object):
         return self.fn(*args, **kwargs)
 
     def lazy(self, *args, **kwargs):
-        return GenSONFunction(
+        rval = GenSONFunction(
                 self.fn,
                 self.fn.__name__,
                 args,
                 kwargs)
+        if self.info:
+            rval.set_info(self.info)
+        return rval
 
 def lazy(f):
     return LazyCall(f)
 
 def register_lazy(f):
     return LazyCall(f, registry_name=f.__name__)
+
+def lazyinfo(**info):
+    def deco(f):
+        rval = LazyCall(f, registry_name=f.__name__)
+        rval.info = info
+        return rval
+    return deco
 
 @lazy
 def identity(obj):
