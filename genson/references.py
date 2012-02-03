@@ -4,14 +4,15 @@ import copy
 
 
 def resolve_scoped_reference(ref, context):
-    """ Given a reference scope in list format (e.g. ['this', 'key1', 'key2']),
-        and a context stack (list of nested dictionary references), resolve
-        the reference and return the value
+    """ Given a reference scope in list format (e.g. ['this', 'key1', 'key2'],
+        for the reference string 'this.key1.key2',
+        and a context stack -- a list of nested dictionary references (nodes) --
+        resolve the reference and return the value
     """
 
     if len(context) == 0:
         # TODO: better
-        raise Exception("Invalid reference")
+        raise Exception("Invalid reference", ref)
 
     # pop an element off of the scope list
     element_to_resolve = ref.pop(0)
@@ -31,6 +32,7 @@ def resolve_scoped_reference(ref, context):
         if not element_to_resolve in current_context:
             # TODO: make better
             raise Exception("Unknown key: %s" % element_to_resolve)
+
     elif isindexable(current_context):
         element_to_resolve = int(element_to_resolve)
         if not 0 <= element_to_resolve < len(current_context):

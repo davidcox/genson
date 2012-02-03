@@ -7,7 +7,7 @@ my_path = path.dirname(path.abspath(__file__))
 
 def parse_and_report_error(doc):
     try:
-        son_iterator = genson.loads(doc)
+        genson.loads(doc)
     except Exception as e:
         print("Caught exception: %s" % e)
         return

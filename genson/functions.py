@@ -1,52 +1,15 @@
 import numpy as np
 from util import resolve, genson_dumps, get_global_seed, assert_kwargs_consumed
 from internal_ops import GenSONOperand
+from internal_ops import GenSONFunction
+from internal_ops import registry
+from internal_ops import register_function
 
-registry = {}
-
-
-class GenSONFunction(GenSONOperand):
-    def __init__(self, fun, name, args, kwargs):
-        self.name = name
-        self.fun = fun
-        self.args = args
-        self.kwargs = kwargs
-
-    def __genson_eval__(self, context):
-        resolved_args = []
-        for a in self.args:
-            resolved_args.append(resolve(a, context))
-
-        resolved_kwargs = {}
-        for k, v in self.kwargs.items():
-            resolved_kwargs[k] = resolve(v, context)
-
-        return self.fun(*resolved_args, **resolved_kwargs)
-
-    def __genson_repr__(self, pretty_print=False, depth=0):
-        arg_list = genson_dumps(self.args, pretty_print, 0)
-        kwarg_list = ["%s=%s" % genson_dumps(x, pretty_print, depth)
-                      for x in self.kwargs.items()]
-        arg_str = ",".join(arg_list + tuple(kwarg_list))
-
-        return "%s(%s)" % (self.name, arg_str)
-
-
-def register_function(name, fun):
-    def wrapper(*args, **kwargs):
-        return GenSONFunction(fun, name, args, kwargs)
-    registry[name] = wrapper
-
-    return wrapper
 
 register_function('sin', np.sin)
 register_function('cos', np.cos)
 register_function('tan', np.tan)
 
-
-# a simple decorator for making genson functions on the fly
-def genson_function(fun):
-    return register_function(fun.__name__, fun)
 
 
 class ParameterGenerator(GenSONOperand):
@@ -115,12 +78,14 @@ registry['grid'] = GridGenerator
 
 
 def genson_call_str(name, *args, **kwargs):
+    """Return string representation of a GenSON function call
+    """
 
-    g_args = genson_dumps(args)
-    g_kwargs = ["%s=%s" % genson_dumps(x)
-                for x in kwargs.items() if x[1] is not None]
+    g_args = [genson_dumps(a) for a in args]
+    g_kwargs = ["%s=%s" % (genson_dumps(k), genson_dumps(v))
+                for k, v in kwargs.items() if v is not None]
 
-    return "%s(%s)" % (name, ",".join(g_args + tuple(g_kwargs)))
+    return "%s(%s)" % (name, ",".join(g_args + g_kwargs))
 
 
 class GaussianRandomGenerator(ParameterGenerator):

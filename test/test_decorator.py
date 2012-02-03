@@ -1,11 +1,11 @@
 
-from genson import genson_function, JSONGenerator
+from genson import register_lazy, JSONGenerator
 from genson.references import ref
 
 
 def test_genson_function_decorator():
 
-    @genson_function
+    @register_lazy
     def double_it(x):
         return 2 * x
 

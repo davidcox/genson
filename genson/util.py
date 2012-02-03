@@ -1,4 +1,5 @@
 # import references
+import copy
 
 default_random_seed = None
 
@@ -39,20 +40,27 @@ def isgensondumpable(x):
     return getattr(x, '__genson_repr__', False)
 
 
-def resolve(x, context=[]):
+def resolve(x, context=None):
+
+    if context is None:
+        context = [x]
+
+    # if the object "knows what to do", let it
     if isgensonevaluable(x):
         return resolve(x.__genson_eval__(context), context)
-    elif isdict(x):
-        # build a new copy of the dict
-        return_dict = {}
 
-        # push down object context stack
-        context.append(return_dict)
+    # a nested JSON object
+    elif isdict(x):
+        return_dict = x
+
+        # push down the dict onto the context stack
+        # context.append(return_dict)
+        context.append(x)
 
         for k, v in x.items():
             val = resolve(v, context)
 
-            # check if we need to do a splat
+            # check if we need to do a "splat"
             if istuple(k):
                 if istuple(val):
                     if len(k) is not len(val):
@@ -63,6 +71,7 @@ def resolve(x, context=[]):
                 else:
                     for splat_key in k:
                         return_dict[splat_key] = resolve(val, context)
+                x.pop(k)
             else:
                 return_dict[k] = val
 
@@ -72,14 +81,15 @@ def resolve(x, context=[]):
         return return_dict
 
     elif istuple(x):
-        return_list = []
-        for v in x:
-            return_list.append(resolve(v, context))
+        return_list = list(x)
+        for i, v in enumerate(x):
+            return_list[i] = resolve(v, context)
         return tuple(return_list)
+
     elif isiterable(x):
-        return_list = []
-        for v in x:
-            return_list.append(resolve(v, context))
+        return_list = x
+        for i, v in enumerate(x):
+            return_list[i] = (resolve(v, context))
         return return_list
     else:
         return x
@@ -113,10 +123,9 @@ def genson_dumps(o, pretty_print=False, depth=0):
             return_str = "{%s}" % ",".join(element_strs)
         return return_str
 
-    elif istuple(o):
-        return tuple([genson_dumps(x, pretty_print, depth) for x in o])
     elif isiterable(o):
-        return [genson_dumps(x, pretty_print, depth) for x in o]
+        return '(%s)' % (
+                ', '.join([genson_dumps(x, pretty_print, depth) for x in o]))
     else:
         return str(o)
 
