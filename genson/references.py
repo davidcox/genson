@@ -28,6 +28,14 @@ def resolve_scoped_reference(ref, context):
 
     current_context = context[-1]
 
+    # check to see if current_context describes an int
+    index = None
+    try:
+        index = int(current_context)
+        current_context = context[-2]
+    except:
+        pass
+
     if isdict(current_context):
         if not element_to_resolve in current_context:
             # TODO: make better
@@ -42,6 +50,9 @@ def resolve_scoped_reference(ref, context):
         raise Exception("Invalid reference")
 
     resolved_element = current_context[element_to_resolve]
+
+    if not index is None:
+        resolved_element = resolved_element[index]
 
     if len(ref) != 0:
         context.append(resolved_element)

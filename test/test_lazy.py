@@ -3,6 +3,7 @@ from genson import lazy
 from genson import JSONFunction
 from genson import ref
 import genson
+from nose.tools import assert_equal
 
 
 @lazy
@@ -36,7 +37,8 @@ def test_lazy_getitem_args_kwargs():
 
     f = JSONFunction(prog)
     result = dict(f(33, aaa='hello'))
-    assert result == wanted
+    #assert result == wanted
+    assert_equal(result, wanted)
 
 
 def test_ref():
@@ -46,7 +48,7 @@ def test_ref():
     prog['a'] = 5
     prog['result'] = foo.lazy(ref('a'))
     f = JSONFunction(prog)
-    assert f()['result'] == 5
+    assert f()['result'][2] == 5
 
 
 def test_ref_within_lazy_function_root():
@@ -55,4 +57,4 @@ def test_ref_within_lazy_function_root():
     prog['result'] = foo.lazy(ref('root.a'))
     f = JSONFunction(prog)
     print f()['result']
-    assert f()['result'] == 5
+    assert f()['result'][2] == 5

@@ -1,10 +1,12 @@
 from parser import GENSONParser
-from internal_ops import lazy
-from internal_ops import register_lazy
-from internal_ops import register_function
-from internal_ops import LazyCall
 from internal_ops import GenSONFunction
 from internal_ops import GenSONOperand
+from internal_ops import lazy
+from internal_ops import lazyinfo
+from internal_ops import LazyCall
+from internal_ops import literal
+from internal_ops import register_lazy
+from internal_ops import register_function
 from references import ref
 from functions import *
 from util import *
@@ -96,13 +98,17 @@ def dumps(generator, pretty_print=False):
         return genson_dumps(generator, pretty_print)
 
 
+# Currently not used
 def node_eval(obj, memo):
+
+    # -- dictionary containers
     if isinstance(obj, (dict, OrderedDict)):
         # XXX: this will evaluate in undefined order for dicts
         waiting_on = [v for v in obj.values() if id(v) not in memo]
         if not waiting_on:
             memo[id(obj)] = dict([(k, memo[id(v)]) for k, v in obj.items()])
 
+    # -- callable nodes
     elif isinstance(obj, GenSONFunction):
         # XXX: this will evaluate in undefined order for kwargs
         inputs = list(obj.args) + obj.kwargs.values()
@@ -112,14 +118,23 @@ def node_eval(obj, memo):
             kwargs = dict([(k, memo[id(v)]) for k, v in obj.kwargs.items()])
             memo[id(obj)] = obj.fun(*args, **kwargs)
 
+    # -- iterable containers
     elif isinstance(obj, (list, tuple)):
         waiting_on = [v for v in obj if id(v) not in memo]
         if not waiting_on:
             memo[id(obj)] = type(obj)([memo[id(v)] for v in obj])
 
-    elif isinstance(obj, (int, float, str)):
+    # -- types that pass-through
+    elif isinstance(obj, (int, float, str, np.ndarray)):
         waiting_on = []
         memo[id(obj)] = obj
+
+    # -- literals that pass-through
+    elif obj in (None,):
+        waiting_on = []
+        memo[id(obj)] = obj
+
+    # -- anything else
     else:
         raise NotImplementedError(obj)
 
@@ -129,6 +144,10 @@ def node_eval(obj, memo):
         return waiting_on
 
 
+STACK_LIMIT = 10000
+
+
+# Currently not used
 def rec_eval(todo, memo):
     """
     Returns nodes required by this one.
@@ -136,12 +155,39 @@ def rec_eval(todo, memo):
     computed and the value is available as memo[id(node)]
     """
     while todo:
+        if len(todo) > STACK_LIMIT:
+            raise RuntimeError('Probably infinite loop in document')
         node = todo.pop()
         if id(node) not in memo:
             todo.extend(node_eval(node, memo))
 
+ARGS_KEY = '__args__'
+KWARGS_KEY = '__kwargs__'
+ARGS_REF = 'root.%s' % ARGS_KEY
+KWARGS_REF = 'root.%s' % KWARGS_KEY
+
 
 class JSONFunction(object):
+
+    ARGS = ref('root.__args__')
+    KWARGS = ref('root.__kwargs__')
+
+    def __init__(self, prog_son):
+        self.prog_son = prog_son
+
+    def __call__(self, *_args, **_kwargs):
+        prog = copy.deepcopy(self.prog_son)
+        prog['__args__'] = copy.deepcopy(_args)
+        prog['__kwargs__'] = copy.deepcopy(_kwargs)
+
+        rval = resolve(prog)
+        rval.pop('__args__')
+        rval.pop('__kwargs__')
+        return rval
+
+
+# Currently not used
+class JAMES_JSONFunction(object):
     """Make a GenSON document into a callable function
     """
     # TODO: make the treatment of args and kwargs in the document
@@ -161,11 +207,10 @@ class JSONFunction(object):
     def __call__(self, *args, **kwargs):
         prog, ARGS, KWARGS = copy.deepcopy(
                 (self.prog, self._ARGS, self._KWARGS))
-        ARGS[:] = args
-        KWARGS.update(kwargs)
+        ARGS[:] = [literal(a) for a in args]
+        KWARGS.update(dict([(k, literal(v)) for k, v in kwargs.items()]))
 
-        #memo = {}
-        #rec_eval([prog], memo)
-        #rval = memo[id(prog)]
-        rval = resolve(prog)
+        memo = {}
+        rec_eval([prog], memo)
+        rval = memo[id(prog)]
         return rval

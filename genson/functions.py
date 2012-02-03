@@ -5,11 +5,9 @@ from internal_ops import GenSONFunction
 from internal_ops import registry
 from internal_ops import register_function
 
-
 register_function('sin', np.sin)
 register_function('cos', np.cos)
 register_function('tan', np.tan)
-
 
 
 class ParameterGenerator(GenSONOperand):
