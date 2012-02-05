@@ -78,6 +78,8 @@ Alternatively, one could simply use regular Python object references, with the c
 
 ## GenSON "Functions"
 
+(contributed by James Bergstra)
+
 It is possible to register arbitrary functions as genson-callable functions using the `lazy_register` decorator, which exposes a `lazy()` method that returns a lazily-evaluated version of the function suitable for use in a GenSON document.  The name of such functions are also made available to the GenSON parser, allowing them to be used in a loaded/parsed document.
 
 An entire GenSON document can also be converted into a callable (rather than iterable) form (with optional arguments), by passing it to the `JSONFunction` object:
