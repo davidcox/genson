@@ -51,6 +51,11 @@ value
     null
 """
 
+# bump out the recursion limit, in case we're parsing a really really
+# deep document
+import sys
+sys.setrecursionlimit(2000)
+
 from pyparsing import *
 from functions import *
 from references import ScopedReference
