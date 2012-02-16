@@ -178,13 +178,6 @@ class GenSONFunction(GenSONOperand):
         return '\n'.join(lines)
 
 
-def register_function(name, fun):
-    def wrapper(*args, **kwargs):
-        return GenSONFunction(fun, name, args, kwargs)
-    registry[name] = wrapper
-    return wrapper
-
-
 class LazyCall(object):
     """
     Class for decorating functions and making them GenSON-compatible.

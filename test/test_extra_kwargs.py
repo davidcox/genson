@@ -1,4 +1,4 @@
-from genson import GridGenerator
+from genson.functions import GridGenerator
 
 
 def test_extra_kwargs():

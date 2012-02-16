@@ -3,7 +3,26 @@ from util import resolve, genson_dumps, get_global_seed, assert_kwargs_consumed
 from internal_ops import GenSONOperand
 from internal_ops import GenSONFunction
 from internal_ops import registry
-from internal_ops import register_function
+
+
+def register_function(name, fun):
+    if fun.__class__ is type and issubclass(fun, GenSONOperand):
+        print('registering: %s' % name)
+        f = fun
+    else:
+        def wrapper(*args, **kwargs):
+            return GenSONFunction(fun, name, args, kwargs)
+
+        f = wrapper
+
+    # make the wrapper available to the parser
+    registry[name] = f
+
+    # make the wrapper available in this module
+    current_module = __import__(__name__)
+    setattr(current_module, name, f)
+
+    return f
 
 register_function('sin', np.sin)
 register_function('cos', np.cos)
@@ -135,7 +154,7 @@ class LognormalRandomGenerator(ParameterGenerator):
                                draws=self.draws, random_seed=self.random_seed)
 
 
-registry['lognormal'] = LognormalRandomGenerator
+register_function('lognormal', LognormalRandomGenerator)
 
 
 class QuantizedLognormalRandomGenerator(ParameterGenerator):
@@ -169,7 +188,7 @@ class QuantizedLognormalRandomGenerator(ParameterGenerator):
                                random_seed=self.random_seed)
 
 
-registry['qlognormal'] = QuantizedLognormalRandomGenerator
+register_function('qlognormal', QuantizedLognormalRandomGenerator)
 
 
 class UniformRandomGenerator(ParameterGenerator):
@@ -194,7 +213,7 @@ class UniformRandomGenerator(ParameterGenerator):
         return genson_call_str('uniform', self.min, self.max,
                                draws=self.draws, random_seed=self.random_seed)
 
-registry['uniform'] = UniformRandomGenerator
+register_function('uniform', UniformRandomGenerator)
 
 
 class ChoiceRandomGenerator(ParameterGenerator):
@@ -216,7 +235,7 @@ class ChoiceRandomGenerator(ParameterGenerator):
                                draws=self.draws, random_seed=self.random_seed)
 
 
-registry['choice'] = ChoiceRandomGenerator
+register_function('choice', ChoiceRandomGenerator)
 
 
 class RandintGenerator(ParameterGenerator):
@@ -240,4 +259,4 @@ class RandintGenerator(ParameterGenerator):
                                draws=self.draws, random_seed=self.random_seed)
 
 
-registry['randint'] = RandintGenerator
+register_function('randint', RandintGenerator)

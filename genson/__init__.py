@@ -6,9 +6,9 @@ from internal_ops import lazyinfo
 from internal_ops import LazyCall
 from internal_ops import literal
 from internal_ops import register_lazy
-from internal_ops import register_function
 from references import ref
-from functions import *
+import functions
+from functions import ParameterGenerator
 from util import *
 import copy
 from collections import OrderedDict
