@@ -76,6 +76,8 @@ GenSON infrastructure can also be used separately from the parser and GenSON dom
 
 Alternatively, one could simply use regular Python object references, with the caveat that the resulting GenSON dictionary may no longer be dumpable into GenSON format, and it may no longer emit valid JSON-encodable objects.
 
+"Generator" objects (e.g. `GaussianRandomGenerator`) can be referred to by the same names as in a GenSON document (file/string) by importing them from `genson.functions` (e.g. `genson.functions.lognormal`).
+
 ## GenSON "Functions"
 
 (contributed by James Bergstra)
