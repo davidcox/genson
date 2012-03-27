@@ -4,10 +4,14 @@ from internal_ops import GenSONOperand
 from internal_ops import GenSONFunction
 from internal_ops import registry
 
+import logging
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger(__name__)
+
 
 def register_function(name, fun):
     if fun.__class__ is type and issubclass(fun, GenSONOperand):
-        print('registering: %s' % name)
+        log.debug('registering: %s' % name)
         f = fun
     else:
         def wrapper(*args, **kwargs):
